@@ -80,29 +80,42 @@ html,body{min-height:100%;font-family:'Nunito',sans-serif;color:var(--text);back
 .btn-ghost{background:var(--cream);color:var(--navy);border:1.5px solid var(--border)}
 .btn:active{opacity:.75}
 /* PRINT */
-.print-area{display:none;flex:1;overflow-y:auto;padding:16px 20px;background:var(--cream)}
-.pdf-card{background:#fff;padding:26px 30px;font-family:Arial,sans-serif;color:#1A2040;max-width:600px;margin:0 auto;border:1px solid #ddd;border-radius:6px}
+.print-area{display:none;flex:1;overflow-y:auto;padding:20px;background:#eee}
+/* ── PDF CARD ── */
+.pdf-card{background:#fff;padding:28px 32px 24px;font-family:Arial,Helvetica,sans-serif;color:#1A2040;max-width:700px;margin:0 auto}
 .pc-logo{text-align:center;margin-bottom:6px}
-.pc-logo img{height:60px}
-.pc-gold{height:2px;background:linear-gradient(to right,transparent,#F0A014,transparent);margin:6px 0 10px}
-.pc-title{text-align:center;font-size:17px;font-weight:bold;color:#1A2040;letter-spacing:.04em;margin-bottom:3px}
-.pc-day{text-align:center;font-size:11px;color:#6B6480;font-weight:bold;letter-spacing:.1em;margin-bottom:8px;text-transform:uppercase}
-.pc-div{height:1px;background:#e5e5e5;margin:6px 0 8px}
-.pc-tbl{width:100%;border-collapse:collapse;font-size:9px}
-.pc-tbl thead tr{background:#1A2040}
-.pc-tbl thead th{color:#fff;padding:6px 8px;text-align:left;font-size:8px;letter-spacing:.08em;font-weight:bold;text-transform:uppercase}
-.pc-tbl thead th:first-child{text-align:center;width:44px}
-.pc-tbl thead th:last-child{width:90px}
-.pc-tbl tbody tr:nth-child(even){background:#F3F1F8}
-.pc-tbl tbody td{padding:4px 8px;border-bottom:1px solid #eee;vertical-align:top}
-.pc-tbl tbody td:first-child{text-align:center;font-weight:bold;white-space:nowrap}
-.pc-tbl .cr td{color:#C0392B;text-decoration:line-through}
-.pc-tbl .sp-row td{color:#aaa;font-style:italic;background:#fafafa!important}
-.pc-note{font-size:7.5px;color:#B0A8C0;margin-top:10px;line-height:1.8}
-.pc-rec{text-align:center;font-size:10px;font-weight:bold;color:#1A2040;margin-top:10px;letter-spacing:.06em;text-transform:uppercase}
-.nb{font-size:7.5px;color:#9A6200;display:block;font-style:italic}
-.print-btn{display:block;margin:14px auto 0;padding:9px 28px;background:#1A2040;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif}
-@media print{.topbar,.subbar,.day-bar,.botbar,.tbl-wrap,.j-admin-wrap{display:none!important}.panel{box-shadow:none}.print-area{display:block!important;padding:0;background:#fff}.pdf-card{border:none;max-width:100%}.print-btn{display:none!important}}
+.pc-logo img{height:80px;width:auto}
+.pc-title{text-align:center;font-size:20px;font-weight:900;color:#4A7C3F;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.pc-day{text-align:center;font-size:13px;font-weight:900;color:#C8973A;letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px}
+.pc-tbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.pc-tbl thead tr th{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#1A2040;padding:6px 8px;border-top:2px solid #1A2040;border-bottom:2px solid #1A2040;text-align:left}
+.pc-tbl thead th:first-child{width:72px;text-align:center}
+.pc-tbl thead th:nth-child(2){width:auto}
+.pc-tbl thead th:last-child{width:160px}
+.pc-tbl tbody tr{border-bottom:1px solid #E8E2D9}
+.pc-tbl tbody tr.sp-row{background:#fafafa}
+.pc-tbl tbody tr.cr td{text-decoration:line-through;color:#C0392B}
+.pc-tbl tbody td{padding:7px 8px;font-size:10px;vertical-align:middle;line-height:1.4}
+.pc-tbl tbody td:first-child{text-align:center;font-weight:900;font-size:11px;color:#1A2040}
+.pc-tbl tbody td:nth-child(2){font-weight:700;text-transform:uppercase;font-size:10px}
+.pc-tbl tbody td:last-child{font-size:9.5px;color:#6B6480;text-transform:uppercase;font-weight:600}
+.pc-tbl .sp-row td{font-style:italic;color:#B0A8C0;font-weight:400;text-transform:none}
+.pc-rule{border:none;border-top:2px solid #1A2040;margin:14px 0 8px}
+.pc-note{font-size:8px;color:#B0A8C0;line-height:1.8;margin-bottom:8px}
+.pc-rec{text-align:center;font-size:11px;font-weight:900;color:#1A2040;letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+.nb{font-size:8px;color:#C8973A;font-style:italic;display:block}
+.print-btn{display:block;margin:16px auto 0;padding:10px 32px;background:#1A2040;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;letter-spacing:.04em}
+@media print{
+  @page{margin:1.5cm}
+  a[href]:after{content:none!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .topbar,.subbar,.day-bar,.botbar,.tbl-wrap,.j-admin-wrap{display:none!important}
+  .panel{box-shadow:none}
+  .print-area{display:block!important;padding:0;background:#fff!important}
+  .pdf-card{max-width:100%;padding:20px 28px}
+  .print-btn{display:none!important}
+  .pc-tbl tbody td{padding:6px 8px}
+}
 </style>
 </head>
 <body>
