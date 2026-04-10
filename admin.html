@@ -219,6 +219,7 @@ var PASS='china2024';
 var aState=loadState();
 var jantares=loadJT();
 var aDay=new Date().getDay();
+var prevFaixa=getCurF();
 var inPrint=false;
 
 function doLogin(){if(document.getElementById('pw').value===PASS){document.getElementById('lock').style.display='none';document.getElementById('panel').style.display='flex';renderAdmin();}else{document.getElementById('pw-err').textContent='Senha incorreta';}}
@@ -226,7 +227,10 @@ function doLogout(){document.getElementById('panel').style.display='none';docume
 function getCurF(){return document.getElementById('fsel').value||'adulto';}
 
 function onFaixaChange(){
-  collectTable(); // save current edits before switching
+  // collect into the PREVIOUS faixa before the switch
+  var _prev=prevFaixa;
+  var _prevDay=aDay;
+  collectTableFor(_prev,_prevDay);
   var f=getCurF(),isJ=(f==='jantares');
   aDay=new Date().getDay();
   // If switching to infantil, default to Mon if current day is a split day
@@ -240,6 +244,7 @@ function onFaixaChange(){
   document.getElementById('btn-add').style.display=isJ?'none':'';
   document.getElementById('btn-reset').style.display=isJ?'none':'';
   document.getElementById('print-btn').style.display=isJ?'none':'';
+  prevFaixa=getCurF();
   if(isJ){renderJAdmin();}else{renderAdmin();}
 }
 
@@ -251,7 +256,7 @@ function renderAdmin(){
   else if(f==='46'||f==='712') showDays=[5,6,0];
   else showDays=ORDER;
   var dc=document.getElementById('adm-days');dc.innerHTML='';
-  showDays.forEach(function(d){var b=document.createElement('button');b.className='dpill'+(d===aDay?' active':'')+(d===today?' today':'');b.textContent=DS[d]+(d===today?' *':'');b.onclick=(function(dd){return function(){collectTable();aDay=dd;renderAdmin();};})(d);dc.appendChild(b);});
+  showDays.forEach(function(d){var b=document.createElement('button');b.className='dpill'+(d===aDay?' active':'')+(d===today?' today':'');b.textContent=DS[d]+(d===today?' *':'');b.onclick=(function(dd){return function(){collectTableFor(getCurF(),aDay);aDay=dd;renderAdmin();};})(d);dc.appendChild(b);});
   // Deep clone the day data before rendering to prevent reference sharing
 var dayData=JSON.parse(JSON.stringify(aState[f][aDay]));
 document.getElementById('rec-in').value=dayData.rec||'';
@@ -292,24 +297,54 @@ function collectTable(){
   var f=getCurF();
   if(f==='jantares')return;
   if(!aState[f]||!aState[f][aDay])return;
-  // Build brand-new array — never mutate shared references
+  // Iterate DOM rows — source of truth is what's visible on screen
+  var rows=document.getElementById('etbody').querySelectorAll('tr');
   var newArr=[];
-  aState[f][aDay].a.forEach(function(a,i){
-    var t=document.getElementById('et'+i),n=document.getElementById('en'+i),
-        l=document.getElementById('el'+i),note=document.getElementById('enote'+i),
-        c2=document.getElementById('ec'+i);
+  rows.forEach(function(row,i){
+    var a=aState[f][aDay].a[i]||{};
+    var t    =document.getElementById('et'+i);
+    var n    =document.getElementById('en'+i);
+    var l    =document.getElementById('el'+i);
+    var note =document.getElementById('enote'+i);
+    var c2   =document.getElementById('ec'+i);
     newArr.push({
-      t:   t    ? t.value    : a.t,
-      n:   n    ? n.value    : a.n,
-      loc: l    ? l.value    : (a.loc||''),
-      note:note ? note.value : (a.note||''),
-      cancelled: c2 ? c2.checked : (a.cancelled||false),
-      sp:  a.sp||0
+      t:    t    ? t.value         : (a.t||''),
+      n:    n    ? n.value         : (a.n||''),
+      loc:  l    ? l.value         : (a.loc||''),
+      note: note ? note.value      : (a.note||''),
+      cancelled: c2 ? c2.checked   : (a.cancelled||false),
+      sp:   a.sp||0
     });
   });
   aState[f][aDay].a = newArr;
   var ri=document.getElementById('rec-in');
   if(ri) aState[f][aDay].rec=ri.value;
+}
+
+function collectTableFor(f,d){
+  if(f==='jantares')return;
+  if(!aState[f]||!aState[f][d])return;
+  var rows=document.getElementById('etbody').querySelectorAll('tr');
+  var newArr=[];
+  rows.forEach(function(row,i){
+    var a=aState[f][d].a[i]||{};
+    var t    =document.getElementById('et'+i);
+    var n    =document.getElementById('en'+i);
+    var l    =document.getElementById('el'+i);
+    var note =document.getElementById('enote'+i);
+    var c2   =document.getElementById('ec'+i);
+    newArr.push({
+      t:    t    ? t.value    : (a.t||''),
+      n:    n    ? n.value    : (a.n||''),
+      loc:  l    ? l.value    : (a.loc||''),
+      note: note ? note.value : (a.note||''),
+      cancelled: c2 ? c2.checked : (a.cancelled||false),
+      sp:   a.sp||0
+    });
+  });
+  if(newArr.length>0) aState[f][d].a = newArr;
+  var ri=document.getElementById('rec-in');
+  if(ri) aState[f][d].rec=ri.value;
 }
 
 function toggleC(i){collectTable();aState[getCurF()][aDay].a[i].cancelled=document.getElementById('ec'+i).checked;renderAdmin();}
