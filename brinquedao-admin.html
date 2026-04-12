@@ -209,12 +209,14 @@ const HDR  = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'applica
 
 function doLogin(){
   if(document.getElementById('pw').value===PASS){
+    sessionStorage.setItem('b_auth','1');
     document.getElementById('lock').style.display='none';
     document.getElementById('panel').style.display='flex';
     render();
   }else{document.getElementById('pw-err').textContent='Senha incorreta';}
 }
 function doLogout(){
+  sessionStorage.removeItem('b_auth');
   document.getElementById('panel').style.display='none';
   document.getElementById('lock').style.display='flex';
   document.getElementById('pw').value='';
@@ -329,7 +331,7 @@ async function openWpp(id,resp){
   if(!k)return;
   const name=resp===2?k.parent2:k.parent;
   const phone=resp===2?k.phone2:k.phone;
-  const msg=`Olá, ${name.split(' ')[0]}! Precisamos que você venha buscar ${k.child} no brinquedão do China Park. Por favor, dirija-se à entrada. 😊`;
+  const msg='Olá, '+name.split(' ')[0]+'! Precisamos que você venha buscar '+k.child+' no brinquedão do China Park. Por favor, dirija-se à entrada.';
   document.getElementById('wpp-sub').textContent=name+' · '+phone;
   document.getElementById('wpp-msg').textContent=msg;
   document.getElementById('wpp-btn').onclick=()=>{window.open('https://wa.me/55'+phone+'?text='+encodeURIComponent(msg),'_blank');closeWpp();};
@@ -339,7 +341,14 @@ async function openWpp(id,resp){
 function closeWpp(){document.getElementById('wpp-sheet').classList.remove('open');}
 
 // Auto-refresh a cada 30s
-setInterval(()=>{if(document.getElementById('panel').style.display==='flex'&&document.getElementById('tab-presentes').classList.contains('active'))render();},30000);
+// Auto-login se sessão ativa
+if(sessionStorage.getItem('b_auth')==='1'){
+  document.getElementById('lock').style.display='none';
+  document.getElementById('panel').style.display='flex';
+  render();
+}
+// Auto-refresh a cada 10s
+setInterval(()=>{if(document.getElementById('panel').style.display==='flex'&&document.getElementById('tab-presentes').classList.contains('active'))render();},10000);
 </script>
 </body>
 </html>
