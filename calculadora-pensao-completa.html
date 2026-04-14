@@ -50,14 +50,28 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 
 /* CATEGORIAS */
 .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 22px; }
-.cat-btn { cursor: pointer; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 11px; background: var(--white); display: flex; align-items: flex-start; gap: 9px; text-align: left; transition: border-color .15s, background .15s; width: 100%; }
+.cat-btn { cursor: pointer; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 13px; background: var(--white); display: flex; align-items: flex-start; gap: 9px; text-align: left; transition: border-color .15s, background .15s; width: 100%; }
 .cat-btn:hover { border-color: var(--green-mid); }
 .cat-btn.active { border-color: var(--green); border-width: 2px; background: var(--green-light); }
+/* Top row — bigger */
+.cat-btn.cat-primary { padding: 16px 14px; }
+.cat-btn.cat-primary .cat-name { font-size: 14px; }
+.cat-btn.cat-primary .cat-sub { font-size: 12px; }
+/* Chalé info card */
+.cat-info { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px 14px; background: #f9fbf8; display: flex; align-items: flex-start; gap: 9px; }
+.cat-info .cat-name { font-size: 14px; color: var(--navy); font-weight: 700; line-height: 1.3; }
+.cat-info .cat-sub { font-size: 12px; color: var(--muted); margin-top: 1px; line-height: 1.4; }
+/* Bottom row — smaller */
+.cat-btn.cat-secondary { padding: 9px 10px; opacity: .85; }
+.cat-btn.cat-secondary .cat-name { font-size: 11px; }
+.cat-btn.cat-secondary .cat-sub { font-size: 10px; }
+.cat-divider { grid-column: 1 / -1; border: none; border-top: 1px dashed var(--border); margin: 2px 0; }
 .cat-dots { display: flex; gap: 3px; padding-top: 2px; flex-shrink: 0; }
 .dot { width: 10px; height: 10px; border-radius: 50%; }
 .cat-name { font-size: 12px; font-weight: 700; color: var(--navy); line-height: 1.3; }
 .cat-sub { font-size: 11px; color: var(--muted); margin-top: 1px; line-height: 1.4; }
 .cat-pill { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 99px; background: var(--gold-light); color: #7a5200; border: .5px solid #e0c06a; margin-top: 3px; }
+.cat-tag-info { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 99px; background: #e8edf3; color: var(--muted); border: .5px solid var(--border); margin-top: 3px; }
 
 /* CAMPO HÓSPEDE */
 .field { margin-bottom: 18px; }
@@ -224,7 +238,8 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
       <div class="card-body">
 
         <div class="cat-grid">
-          <button class="cat-btn active" onclick="setCategoria('padrao',this)">
+          <!-- LINHA 1: destaque -->
+          <button class="cat-btn cat-primary active" onclick="setCategoria('padrao',this)">
             <div class="cat-dots">
               <span class="dot" style="background:#2196F3"></span>
               <span class="dot" style="background:#e91e8c"></span>
@@ -232,34 +247,39 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
               <span class="dot" style="background:#C8973A"></span>
             </div>
             <div>
-              <div class="cat-name">Hóspede / Sócio / Proprietário</div>
+              <div class="cat-name">Cotista / Sócio / Proprietário</div>
               <div class="cat-sub">Azul, rosa, verde, dourada</div>
             </div>
           </button>
-          <button class="cat-btn" onclick="setCategoria('branca',this)">
-            <div class="cat-dots"><span class="dot" style="background:#e0e0e0;border:1px solid #bbb"></span></div>
-            <div>
-              <div class="cat-name">Pulseira Branca</div>
-              <div class="cat-sub">Café da manhã já incluso</div>
-              <span class="cat-pill">complementação</span>
-            </div>
-          </button>
-          <button class="cat-btn" onclick="setCategoria('amarela',this)">
-            <div class="cat-dots"><span class="dot" style="background:#FFD600"></span></div>
-            <div>
-              <div class="cat-name">Pulseira Amarela</div>
-              <div class="cat-sub">Jantar + café da manhã já inclusos</div>
-              <span class="cat-pill">complementação · sem desconto</span>
-            </div>
-          </button>
-          <button class="cat-btn" onclick="setCategoria('dayuse',this)">
+          <div class="cat-info">
             <div class="cat-dots">
               <span class="dot" style="background:#e53935"></span>
               <span class="dot" style="background:#fb8c00"></span>
             </div>
             <div>
-              <div class="cat-name">Day Use / Visitante</div>
-              <div class="cat-sub">Pulseira vermelha ou laranja</div>
+              <div class="cat-name">Chalé Particular</div>
+              <div class="cat-sub">Vermelha ou laranja</div>
+              <span class="cat-tag-info">Day Use / Visitante</span>
+            </div>
+          </div>
+
+          <hr class="cat-divider">
+
+          <!-- LINHA 2: menor destaque -->
+          <button class="cat-btn cat-secondary" onclick="setCategoria('amarela',this)">
+            <div class="cat-dots"><span class="dot" style="background:#FFD600"></span></div>
+            <div>
+              <div class="cat-name">Pulseira Amarela</div>
+              <div class="cat-sub">Jantar + café já inclusos</div>
+              <span class="cat-pill">sem desconto</span>
+            </div>
+          </button>
+          <button class="cat-btn cat-secondary" onclick="setCategoria('branca',this)">
+            <div class="cat-dots"><span class="dot" style="background:#e0e0e0;border:1px solid #bbb"></span></div>
+            <div>
+              <div class="cat-name">Pulseira Branca</div>
+              <div class="cat-sub">Café da manhã já incluso</div>
+              <span class="cat-pill">complementação</span>
             </div>
           </button>
         </div>
