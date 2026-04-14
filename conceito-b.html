@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pensão Completa · Conceito B | China Park</title>
+<style>
+:root {
+  --green: #4A7C3F;
+  --green-d: #3a6130;
+  --green-light: #eaf3e7;
+  --green-mid: #7ab870;
+  --gold: #C8973A;
+  --gold-light: #fdf6e8;
+  --navy: #1a2535;
+  --navy2: #202f42;
+  --text: #1a2535;
+  --muted: #6b7a8d;
+  --border: #dde4ec;
+  --bg: #eef2f7;
+  --white: #fff;
+  --panel: #f7f9fc;
+  --red: #c0392b;
+  --r: 10px; --rs: 7px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+
+/* ── TOPBAR ── */
+.topbar { background: var(--navy); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 50px; flex-shrink: 0; }
+.topbar-l { display: flex; align-items: center; gap: 10px; }
+.t-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-mid); flex-shrink: 0; }
+.t-title { color: #fff; font-size: 14px; font-weight: 700; }
+.t-sub { color: rgba(255,255,255,.38); font-size: 12px; }
+.topbar-r { display: flex; gap: 8px; }
+.tb-btn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.75); padding: 6px 14px; border-radius: var(--rs); cursor: pointer; font-size: 12px; font-weight: 600; transition: background .15s; }
+.tb-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
+.tb-btn.green { background: var(--green); color: #fff; border-color: var(--green-d); }
+.tb-btn.green:hover { background: var(--green-d); }
+.tb-btn:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
+
+/* ── CANVAS 3 COLUNAS ── */
+.canvas { flex: 1; display: grid; grid-template-columns: 300px 1fr 290px; overflow: hidden; }
+
+/* ── COL ESQUERDA: CONFIGURAÇÃO ── */
+.col-config { background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+.col-head { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.col-head h2 { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.col-body { padding: 18px; flex: 1; }
+
+.slabel { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+
+/* Categoria pulseira */
+.cat-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 22px; }
+.cat-item { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border: 1.5px solid var(--border); border-radius: var(--rs); cursor: pointer; transition: border-color .12s, background .12s; background: var(--white); }
+.cat-item:hover { border-color: var(--green-mid); }
+.cat-item.active { border-color: var(--green); border-width: 2px; background: var(--green-light); }
+.cat-dots { display: flex; gap: 3px; flex-shrink: 0; }
+.dot { width: 9px; height: 9px; border-radius: 50%; }
+.cat-text { flex: 1; }
+.cat-name { font-size: 12px; font-weight: 700; color: var(--navy); }
+.cat-sub  { font-size: 10px; color: var(--muted); margin-top: 1px; }
+.cat-pill { font-size: 9px; padding: 1px 6px; border-radius: 99px; background: var(--gold-light); color: #7a5200; border: .5px solid #e0c06a; display: inline-block; margin-top: 2px; }
+
+/* Diárias */
+.diarias-block { margin-bottom: 22px; }
+.diarias-row { display: flex; align-items: center; gap: 10px; }
+.diarias-row input { width: 80px; height: 44px; border: 1px solid var(--border); border-radius: var(--rs); font-size: 22px; font-weight: 700; text-align: center; color: var(--navy); outline: none; }
+.diarias-row input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(74,124,63,.12); }
+.disc-tag { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 99px; }
+.disc-on   { background: var(--green-light); color: var(--green); border: 1px solid #b3d5ac; }
+.disc-off  { background: #f0f3f6; color: var(--muted); border: 1px solid var(--border); }
+.disc-gold { background: var(--gold-light); color: #7a5200; border: 1px solid #e0c06a; }
+
+/* Hóspede */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+.field input[type=text], .field textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: var(--rs); font-size: 14px; color: var(--text); background: var(--white); outline: none; font-family: inherit; padding: 0 10px;
+}
+.field input[type=text] { height: 40px; }
+.field textarea { padding: 8px 10px; height: 72px; resize: none; line-height: 1.5; font-size: 13px; }
+.field input:focus, .field textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(74,124,63,.12); }
+
+/* ── COL CENTRAL: PESSOAS ── */
+.col-guests { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.col-guests-head { background: var(--white); padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.col-guests-head h2 { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.btn-add { font-size: 12px; font-weight: 700; color: var(--green); background: var(--green-light); border: 1px solid #b3d5ac; border-radius: var(--rs); padding: 6px 12px; cursor: pointer; }
+.btn-add:hover { background: #d6ecd1; }
+
+.guest-grid { flex: 1; overflow-y: auto; padding: 16px 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; align-content: start; }
+
+/* Card de pessoa */
+.person-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; position: relative; }
+.person-card.free-card { border-color: #e0c06a; background: #fffcf5; }
+.person-card.adult-card { border-color: #b3d5ac; background: #f9fcf8; }
+
+.pc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.pc-num { width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.pc-remove { width: 22px; height: 22px; border: none; background: transparent; color: #bbc; cursor: pointer; font-size: 16px; line-height: 1; border-radius: 4px; }
+.pc-remove:hover { background: #fee; color: var(--red); }
+
+.pc-faixa-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 6px; }
+.faixa-options { display: flex; flex-direction: column; gap: 4px; }
+.faixa-opt { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--rs); cursor: pointer; transition: all .12s; background: var(--white); }
+.faixa-opt:hover { border-color: var(--green-mid); }
+.faixa-opt.selected-adult { border-color: var(--green); background: var(--green-light); }
+.faixa-opt.selected-child { border-color: var(--green); background: var(--green-light); }
+.faixa-opt.selected-free  { border-color: var(--gold); background: var(--gold-light); }
+.faixa-radio { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.faixa-opt.selected-adult .faixa-radio,
+.faixa-opt.selected-child .faixa-radio { border-color: var(--green); background: var(--green); }
+.faixa-opt.selected-free  .faixa-radio { border-color: var(--gold); background: var(--gold); }
+.faixa-radio::after { content:''; width:5px; height:5px; border-radius:50%; background:#fff; display:none; }
+.faixa-opt.selected-adult .faixa-radio::after,
+.faixa-opt.selected-child .faixa-radio::after,
+.faixa-opt.selected-free  .faixa-radio::after { display:block; }
+.faixa-text { flex: 1; }
+.faixa-name { font-size: 12px; font-weight: 600; color: var(--navy); }
+.faixa-price { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.pc-badge { margin-top: 10px; text-align: center; font-size: 11px; font-weight: 700; padding: 4px 0; border-radius: var(--rs); }
+.pc-badge.adult { background: var(--green-light); color: var(--green); }
+.pc-badge.child { background: var(--green-light); color: var(--green); }
+.pc-badge.free  { background: var(--gold-light); color: #7a5200; }
+
+.empty-guests { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: var(--muted); font-size: 13px; gap: 10px; text-align: center; line-height: 1.6; }
+.empty-icon { font-size: 28px; }
+
+/* ── COL DIREITA: RESULTADO ── */
+.col-result { background: var(--navy2); display: flex; flex-direction: column; overflow-y: auto; }
+.col-result .col-head { background: transparent; border-bottom-color: rgba(255,255,255,.07); }
+.col-result .col-head h2 { color: rgba(255,255,255,.38); }
+.col-result .col-body { padding: 18px; }
+
+.r-block { margin-bottom: 16px; }
+.r-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 8px; }
+
+.r-line { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; color: rgba(255,255,255,.5); padding: 3px 0; gap: 8px; }
+.r-line .v { color: rgba(255,255,255,.85); font-weight: 600; white-space: nowrap; }
+.r-line.disc { color: #7ab870; }
+.r-line.disc .v { color: #7ab870; }
+.r-line.free .v { color: var(--gold); }
+
+.r-sep { border: none; border-top: 1px solid rgba(255,255,255,.07); margin: 12px 0; }
+
+.r-total { background: var(--green); border-radius: var(--r); padding: 16px; margin: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+.r-total .tl { color: rgba(255,255,255,.75); font-size: 12px; }
+.r-total .tv { color: #fff; font-size: 28px; font-weight: 800; }
+
+.r-meals { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: var(--rs); padding: 12px 14px; }
+.r-meals-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--green-mid); margin-bottom: 7px; }
+.r-meal { font-size: 12px; color: rgba(255,255,255,.6); padding: 2px 0; }
+.r-meal::before { content: "✓  "; color: var(--green-mid); }
+
+.r-no-disc { background: rgba(200,151,58,.1); border: 1px solid rgba(200,151,58,.25); border-radius: var(--rs); padding: 8px 11px; font-size: 11px; color: rgba(200,151,58,.9); margin-top: 10px; }
+
+.r-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 180px; color: rgba(255,255,255,.25); font-size: 13px; text-align: center; gap: 10px; line-height: 1.6; }
+
+.r-hospede { background: rgba(255,255,255,.06); border-radius: var(--rs); padding: 10px 13px; margin-bottom: 14px; }
+.r-hospede-lbl { font-size: 10px; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 3px; }
+.r-hospede-name { font-size: 15px; font-weight: 700; color: #fff; }
+
+/* ── PRINT ── */
+#print-area { display: none; }
+@media print {
+  body > * { display: none !important; }
+  #print-area {
+    display: block !important;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #1a2535; font-size: 13px; line-height: 1.6; padding: 0;
+  }
+  .pa-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #4A7C3F; padding-bottom: 14px; margin-bottom: 20px; }
+  .pa-logo-text { font-size: 22px; font-weight: 800; color: #4A7C3F; }
+  .pa-logo-sub  { font-size: 11px; color: #6b7a8d; margin-top: 2px; }
+  .pa-doc-title { font-size: 16px; font-weight: 700; color: #1a2535; text-align: right; }
+  .pa-doc-date  { font-size: 11px; color: #6b7a8d; margin-top: 3px; text-align: right; }
+
+  .pa-hospede { background: #f4f7fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; }
+  .pa-hospede-lbl  { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #6b7a8d; }
+  .pa-hospede-name { font-size: 18px; font-weight: 700; color: #1a2535; }
+
+  .pa-info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 18px; }
+  .pa-info-item { background: #f9fbf8; border: 1px solid #dde4ec; border-radius: 7px; padding: 10px 13px; }
+  .pa-info-item .lbl { font-size: 11px; color: #6b7a8d; }
+  .pa-info-item .val { font-size: 15px; font-weight: 700; color: #1a2535; margin-top: 2px; }
+
+  .pa-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #4A7C3F; margin-bottom: 8px; border-bottom: 1px solid #dde4ec; padding-bottom: 5px; }
+  .pa-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 6px; }
+  .pa-table th { background: #1a2535; color: #fff; padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+  .pa-table td { padding: 8px 12px; border-bottom: 1px solid #eef1f5; }
+  .pa-table tr:last-child td { border-bottom: none; }
+  .pa-table .right { text-align: right; font-weight: 600; }
+  .pa-table .disc-row td { color: #4A7C3F; font-weight: 600; }
+  .pa-table .free-row td { color: #C8973A; }
+
+  .pa-total { background: #4A7C3F; border-radius: 8px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin: 14px 0; }
+  .pa-total .tl { color: rgba(255,255,255,.8); font-size: 13px; }
+  .pa-total .tv { color: #fff; font-size: 24px; font-weight: 800; }
+
+  .pa-meals { background: #eaf3e7; border: 1px solid #b3d5ac; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; }
+  .pa-meals-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #4A7C3F; margin-bottom: 5px; }
+  .pa-meals-list  { font-size: 13px; color: #2d5929; }
+
+  .pa-obs { background: #fdf6e8; border: 1px solid #e0c06a; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; }
+  .pa-obs-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #7a5200; margin-bottom: 5px; }
+  .pa-obs-text  { font-size: 13px; color: #5a3c00; white-space: pre-wrap; }
+
+  .pa-footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #dde4ec; display: flex; justify-content: space-between; font-size: 11px; color: #6b7a8d; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-l">
+    <span class="t-dot"></span>
+    <span class="t-title">Pensão Completa</span>
+    <span class="t-sub">China Park Eco Resort · recepção</span>
+  </div>
+  <div class="topbar-r">
+    <button class="tb-btn" onclick="limpar()">↺ Limpar</button>
+    <button class="tb-btn green" id="btn-pdf" onclick="gerarPdf()" disabled>📄 Gerar cotação PDF</button>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<div class="canvas">
+
+  <!-- ── COL 1: CONFIGURAÇÃO ── -->
+  <div class="col-config">
+    <div class="col-head"><h2>Categoria / Pulseira</h2></div>
+    <div class="col-body">
+
+      <div class="cat-list">
+        <div class="cat-item active" onclick="setCategoria('padrao',this)">
+          <div class="cat-dots">
+            <span class="dot" style="background:#2196F3"></span>
+            <span class="dot" style="background:#e91e8c"></span>
+            <span class="dot" style="background:#43A047"></span>
+            <span class="dot" style="background:#C8973A"></span>
+          </div>
+          <div class="cat-text">
+            <div class="cat-name">Hóspede / Sócio / Proprietário</div>
+            <div class="cat-sub">Azul, rosa, verde, dourada</div>
+          </div>
+        </div>
+        <div class="cat-item" onclick="setCategoria('branca',this)">
+          <div class="cat-dots"><span class="dot" style="background:#e0e0e0;border:1px solid #bbb"></span></div>
+          <div class="cat-text">
+            <div class="cat-name">Pulseira Branca</div>
+            <div class="cat-sub">Café da manhã já incluso</div>
+            <span class="cat-pill">complementação</span>
+          </div>
+        </div>
+        <div class="cat-item" onclick="setCategoria('amarela',this)">
+          <div class="cat-dots"><span class="dot" style="background:#FFD600"></span></div>
+          <div class="cat-text">
+            <div class="cat-name">Pulseira Amarela</div>
+            <div class="cat-sub">Jantar + café da manhã já inclusos</div>
+            <span class="cat-pill">complementação · sem desconto</span>
+          </div>
+        </div>
+        <div class="cat-item" onclick="setCategoria('dayuse',this)">
+          <div class="cat-dots">
+            <span class="dot" style="background:#e53935"></span>
+            <span class="dot" style="background:#fb8c00"></span>
+          </div>
+          <div class="cat-text">
+            <div class="cat-name">Day Use / Visitante</div>
+            <div class="cat-sub">Pulseira vermelha ou laranja</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="slabel">Número de diárias</p>
+      <div class="diarias-block">
+        <div class="diarias-row">
+          <input type="number" id="diarias" min="1" max="30" value="1" oninput="calcular()">
+          <span id="disc-tag" class="disc-tag disc-off">sem desconto</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;">
+          A pensão começa no <strong style="color:var(--navy)">café da tarde</strong> (check-in 15h).<br>
+          3–4 diárias: 10% · 5+: 20% de desconto.
+        </div>
+      </div>
+
+      <p class="slabel">Hóspede</p>
+      <div class="field">
+        <label>Nome</label>
+        <input type="text" id="nome" placeholder="Ex: João Silva" oninput="calcular()">
+      </div>
+
+      <p class="slabel">Observações</p>
+      <div class="field">
+        <label>Campo livre</label>
+        <textarea id="obs" placeholder="Ex: hóspede VIP, promoção especial..."></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── COL 2: HÓSPEDES ── -->
+  <div class="col-guests">
+    <div class="col-guests-head">
+      <h2>Composição do grupo</h2>
+      <button class="btn-add" onclick="addPessoa()">+ Adicionar pessoa</button>
+    </div>
+    <div class="guest-grid" id="guest-grid">
+      <div class="empty-guests" id="empty-msg">
+        <div class="empty-icon">👥</div>
+        Clique em "Adicionar pessoa"<br>para montar o grupo.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── COL 3: RESULTADO ── -->
+  <div class="col-result">
+    <div class="col-head"><h2>Resultado</h2></div>
+    <div class="col-body" id="result-body">
+      <div class="r-empty">
+        <div>🧮</div>
+        Configure a categoria,<br>as diárias e adicione pessoas.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /canvas -->
+
+<div id="print-area"></div>
+
+<script>
+const CATS = {
+  padrao:  { label:'Hóspede / Sócio / Proprietário', pulseiras:'Azul, Rosa, Verde, Dourada', adult:320, child:180, discount:true,  meals:['Café da tarde','Jantar','Café da manhã','Almoço'] },
+  branca:  { label:'Pulseira Branca',                pulseiras:'Branca',                     adult:290, child:150, discount:true,  meals:['Café da tarde','Jantar','Almoço'] },
+  amarela: { label:'Pulseira Amarela',               pulseiras:'Amarela',                    adult:170, child:100, discount:false, meals:['Café da tarde','Almoço'] },
+  dayuse:  { label:'Day Use / Visitante',            pulseiras:'Vermelha, Laranja',          adult:400, child:200, discount:true,  meals:['Café da tarde','Jantar','Café da manhã','Almoço'] },
+};
+
+let cat = 'padrao';
+let pessoas = [];
+let counter = 0;
+
+function setCategoria(c, el) {
+  cat = c;
+  document.querySelectorAll('.cat-item').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  // atualiza preços nos cards
+  document.querySelectorAll('.person-card').forEach(card => {
+    const id = +card.dataset.id;
+    const p  = pessoas.find(x => x.id === id);
+    if (p) atualizaPrecoCard(card, p.tier);
+  });
+  calcular();
+}
+
+function addPessoa() {
+  counter++;
+  const id = counter;
+  pessoas.push({ id, tier: 'adult' });
+  document.getElementById('empty-msg')?.remove();
+
+  const p = CATS[cat];
+  const grid = document.getElementById('guest-grid');
+  const card = document.createElement('div');
+  card.className = 'person-card adult-card';
+  card.id = 'pc-' + id;
+  card.dataset.id = id;
+
+  card.innerHTML = `
+    <div class="pc-head">
+      <span class="pc-num">${pessoas.length}</span>
+      <button class="pc-remove" onclick="removePessoa(${id})">×</button>
+    </div>
+    <div class="pc-faixa-label">Faixa etária</div>
+    <div class="faixa-options">
+      <div class="faixa-opt selected-adult" onclick="setTier(${id},'adult',this)">
+        <span class="faixa-radio"></span>
+        <span class="faixa-text">
+          <span class="faixa-name">12 anos ou mais</span>
+          <span class="faixa-price" id="pr-adult-${id}">${fmt(p.adult)}/diária</span>
+        </span>
+      </div>
+      <div class="faixa-opt" onclick="setTier(${id},'child',this)">
+        <span class="faixa-radio"></span>
+        <span class="faixa-text">
+          <span class="faixa-name">6 a 11 anos</span>
+          <span class="faixa-price" id="pr-child-${id}">${fmt(p.child)}/diária</span>
+        </span>
+      </div>
+      <div class="faixa-opt" onclick="setTier(${id},'free',this)">
+        <span class="faixa-radio"></span>
+        <span class="faixa-text">
+          <span class="faixa-name">0 a 5 anos</span>
+          <span class="faixa-price">Gratuito</span>
+        </span>
+      </div>
+    </div>
+    <div class="pc-badge adult" id="badge-${id}">Adulto · ${fmt(p.adult)}/diária</div>
+  `;
+  grid.appendChild(card);
+  calcular();
+}
+
+function atualizaPrecoCard(card, tier) {
+  const id = +card.dataset.id;
+  const p  = CATS[cat];
+  const adEl = document.getElementById('pr-adult-' + id);
+  const chEl = document.getElementById('pr-child-' + id);
+  if (adEl) adEl.textContent = fmt(p.adult) + '/diária';
+  if (chEl) chEl.textContent = fmt(p.child) + '/diária';
+  const badge = document.getElementById('badge-' + id);
+  if (badge) {
+    if (tier === 'adult') badge.textContent = `Adulto · ${fmt(p.adult)}/diária`;
+    else if (tier === 'child') badge.textContent = `Criança · ${fmt(p.child)}/diária`;
+    else badge.textContent = 'Gratuito (0–5 anos)';
+  }
+}
+
+function setTier(id, tier, el) {
+  const p = pessoas.find(x => x.id === id);
+  if (p) p.tier = tier;
+
+  const card = document.getElementById('pc-' + id);
+  if (!card) return;
+
+  card.querySelectorAll('.faixa-opt').forEach(o => {
+    o.className = 'faixa-opt';
+  });
+  el.className = 'faixa-opt selected-' + tier;
+
+  card.className = 'person-card ' + (tier === 'free' ? 'free-card' : tier === 'child' ? 'adult-card' : 'adult-card');
+
+  const badge = document.getElementById('badge-' + id);
+  if (badge) {
+    const pr = CATS[cat];
+    badge.className = 'pc-badge ' + tier;
+    if (tier === 'adult') badge.textContent = `Adulto · ${fmt(pr.adult)}/diária`;
+    else if (tier === 'child') badge.textContent = `Criança · ${fmt(pr.child)}/diária`;
+    else badge.textContent = 'Gratuito (0–5 anos)';
+  }
+  calcular();
+}
+
+function removePessoa(id) {
+  pessoas = pessoas.filter(x => x.id !== id);
+  document.getElementById('pc-' + id)?.remove();
+  document.querySelectorAll('.person-card').forEach((c, i) => {
+    c.querySelector('.pc-num').textContent = i + 1;
+  });
+  if (!pessoas.length) {
+    const m = document.createElement('div');
+    m.className = 'empty-guests'; m.id = 'empty-msg';
+    m.innerHTML = '<div class="empty-icon">👥</div>Clique em "Adicionar pessoa"<br>para montar o grupo.';
+    document.getElementById('guest-grid').appendChild(m);
+  }
+  calcular();
+}
+
+function fmt(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 }); }
+
+function calcular() {
+  const n = Math.max(1, parseInt(document.getElementById('diarias').value) || 1);
+  const p = CATS[cat];
+  const nome = document.getElementById('nome').value.trim();
+
+  // badge desconto
+  let discPct = 0;
+  if (p.discount && n >= 5) discPct = 20;
+  else if (p.discount && n >= 3) discPct = 10;
+  const tag = document.getElementById('disc-tag');
+  if (!p.discount) { tag.textContent = 'sem desconto'; tag.className = 'disc-tag disc-gold'; }
+  else if (discPct > 0) { tag.textContent = discPct + '% de desconto'; tag.className = 'disc-tag disc-on'; }
+  else { tag.textContent = 'sem desconto'; tag.className = 'disc-tag disc-off'; }
+
+  // preços nos cards
+  document.querySelectorAll('.person-card').forEach(card => {
+    const id = +card.dataset.id;
+    const pe = pessoas.find(x => x.id === id);
+    if (pe) atualizaPrecoCard(card, pe.tier);
+  });
+
+  const body = document.getElementById('result-body');
+
+  if (!pessoas.length) {
+    body.innerHTML = '<div class="r-empty"><div>👥</div>Adicione pessoas ao grupo.</div>';
+    document.getElementById('btn-pdf').disabled = true;
+    return;
+  }
+
+  const adults = pessoas.filter(x => x.tier === 'adult');
+  const childs = pessoas.filter(x => x.tier === 'child');
+  const frees  = pessoas.filter(x => x.tier === 'free');
+
+  const sub_ad = adults.length * p.adult * n;
+  const sub_ch = childs.length * p.child * n;
+  const subtotal = sub_ad + sub_ch;
+  const desconto = subtotal * discPct / 100;
+  const total = subtotal - desconto;
+
+  let lines = '';
+  if (adults.length) lines += `<div class="r-line"><span>${adults.length} adulto${adults.length>1?'s':''} × ${fmt(p.adult)} × ${n} diária${n>1?'s':''}</span><span class="v">${fmt(sub_ad)}</span></div>`;
+  if (childs.length) lines += `<div class="r-line"><span>${childs.length} criança${childs.length>1?'s':''} (6–11) × ${fmt(p.child)} × ${n} diária${n>1?'s':''}</span><span class="v">${fmt(sub_ch)}</span></div>`;
+  if (frees.length)  lines += `<div class="r-line free"><span>${frees.length} criança${frees.length>1?'s':''} (0–5 anos)</span><span class="v">Gratuito</span></div>`;
+  const discLine = discPct > 0 ? `<div class="r-line disc"><span>Desconto ${discPct}% (${n} diárias)</span><span class="v">− ${fmt(desconto)}</span></div>` : '';
+  const noDiscNote = cat === 'amarela' ? `<div class="r-no-disc">⚠️ Pulseira Amarela não tem desconto por diárias.</div>` : '';
+  const mealsHtml = p.meals.map(m => `<div class="r-meal">${m}</div>`).join('');
+
+  const hospBlock = nome ? `<div class="r-hospede"><div class="r-hospede-lbl">Hóspede</div><div class="r-hospede-name">${nome}</div></div>` : '';
+
+  body.innerHTML = `
+    ${hospBlock}
+    <div class="r-block">
+      <div class="r-label">Composição</div>
+      ${lines}${discLine}
+    </div>
+    <hr class="r-sep">
+    <div class="r-total"><span class="tl">Total a cobrar</span><span class="tv">${fmt(total)}</span></div>
+    ${noDiscNote}
+    <div class="r-meals">
+      <div class="r-meals-title">Refeições incluídas/diária</div>
+      ${mealsHtml}
+    </div>
+  `;
+
+  document.getElementById('btn-pdf').disabled = !nome;
+
+  // salva para PDF
+  window._lastCalc = { n, p, cat, nome, adults, childs, frees, sub_ad, sub_ch, subtotal, discPct, desconto, total };
+}
+
+function gerarPdf() {
+  const c = window._lastCalc;
+  if (!c) return;
+  const obs  = document.getElementById('obs').value.trim();
+  const now  = new Date().toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  let tRows = '';
+  if (c.adults.length) tRows += `<tr><td>Adulto${c.adults.length>1?'s':''} (12+ anos)</td><td class="right">${c.adults.length}</td><td class="right">${c.n}</td><td class="right">${fmt(c.p.adult)}</td><td class="right">${fmt(c.sub_ad)}</td></tr>`;
+  if (c.childs.length) tRows += `<tr><td>Criança${c.childs.length>1?'s':''} (6–11 anos)</td><td class="right">${c.childs.length}</td><td class="right">${c.n}</td><td class="right">${fmt(c.p.child)}</td><td class="right">${fmt(c.sub_ch)}</td></tr>`;
+  if (c.frees.length)  tRows += `<tr class="free-row"><td>Criança${c.frees.length>1?'s':''} (0–5 anos)</td><td class="right">${c.frees.length}</td><td class="right">${c.n}</td><td class="right">—</td><td class="right">Gratuito</td></tr>`;
+  if (c.discPct > 0)   tRows += `<tr class="disc-row"><td colspan="4">Desconto ${c.discPct}% (${c.n} diárias)</td><td class="right">− ${fmt(c.desconto)}</td></tr>`;
+
+  const mealsLine = c.p.meals.join(' · ');
+  const obsBlock  = obs ? `<div class="pa-obs"><div class="pa-obs-title">Observações</div><div class="pa-obs-text">${obs.replace(/</g,'&lt;')}</div></div>` : '';
+
+  document.getElementById('print-area').innerHTML = `
+    <div class="pa-header">
+      <div><div class="pa-logo-text">China Park</div><div class="pa-logo-sub">Eco Resort · Domingos Martins, ES</div></div>
+      <div><div class="pa-doc-title">Cotação de Pensão Completa</div><div class="pa-doc-date">Gerado em ${now}</div></div>
+    </div>
+    <div class="pa-hospede">
+      <div class="pa-hospede-lbl">Hóspede</div>
+      <div class="pa-hospede-name">${c.nome}</div>
+    </div>
+    <div class="pa-info-grid">
+      <div class="pa-info-item"><div class="lbl">Diárias</div><div class="val">${c.n} diária${c.n>1?'s':''}</div></div>
+      <div class="pa-info-item"><div class="lbl">Total de pessoas</div><div class="val">${c.adults.length + c.childs.length + c.frees.length}</div></div>
+      <div class="pa-info-item"><div class="lbl">Categoria</div><div class="val">${c.p.label}</div></div>
+    </div>
+    <div class="pa-section-title">Composição do valor</div>
+    <table class="pa-table">
+      <thead><tr><th>Descrição</th><th class="right">Qtd</th><th class="right">Diárias</th><th class="right">Valor/diária</th><th class="right">Subtotal</th></tr></thead>
+      <tbody>${tRows}</tbody>
+    </table>
+    <div class="pa-total"><span class="tl">Total a cobrar</span><span class="tv">${fmt(c.total)}</span></div>
+    <div class="pa-meals"><div class="pa-meals-title">Refeições incluídas por diária</div><div class="pa-meals-list">${mealsLine}</div></div>
+    ${obsBlock}
+    <div class="pa-footer">
+      <span>China Park Eco Resort · uso interno recepção</span>
+      <span>Este documento é uma cotação e não substitui a confirmação de reserva.</span>
+    </div>
+  `;
+  window.print();
+}
+
+function limpar() {
+  pessoas = []; counter = 0;
+  document.getElementById('guest-grid').innerHTML = '<div class="empty-guests" id="empty-msg"><div class="empty-icon">👥</div>Clique em "Adicionar pessoa"<br>para montar o grupo.</div>';
+  document.getElementById('diarias').value = 1;
+  document.getElementById('nome').value = '';
+  document.getElementById('obs').value = '';
+  document.querySelectorAll('.cat-item').forEach((x,i) => x.classList.toggle('active', i===0));
+  cat = 'padrao';
+  document.getElementById('btn-pdf').disabled = true;
+  calcular();
+}
+
+calcular();
+</script>
+</body>
+</html>
