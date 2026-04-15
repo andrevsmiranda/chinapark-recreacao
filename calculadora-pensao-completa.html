@@ -72,6 +72,10 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 .cat-sub { font-size: 11px; color: var(--muted); margin-top: 1px; line-height: 1.4; }
 .cat-pill { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 99px; background: var(--gold-light); color: #7a5200; border: .5px solid #e0c06a; margin-top: 3px; }
 .cat-tag-info { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 99px; background: #e8edf3; color: var(--muted); border: .5px solid var(--border); margin-top: 3px; }
+.cat-age-prices { display: flex; flex-direction: column; gap: 3px; margin-top: 7px; }
+.age-item { display: flex; justify-content: space-between; align-items: center; font-size: 11px; background: rgba(0,0,0,.04); border-radius: 6px; padding: 3px 7px; gap: 8px; }
+.age-faixa { color: var(--muted); }
+.age-val { font-weight: 700; color: var(--navy); white-space: nowrap; }
 
 /* CAMPO HÓSPEDE */
 .field { margin-bottom: 18px; }
@@ -101,22 +105,12 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 .counter button:hover { background: #e8ecf0; }
 .counter .cnt-val { width: 44px; text-align: center; font-size: 16px; font-weight: 700; color: var(--navy); height: 38px; line-height: 38px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
 
-/* CRIANÇAS */
-.children-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.btn-add-child { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: var(--green); background: var(--green-light); border: 1px solid #b3d5ac; border-radius: var(--radius-sm); padding: 6px 12px; cursor: pointer; }
-.btn-add-child:hover { background: #d6ecd1; }
-.child-list { display: flex; flex-direction: column; gap: 7px; }
-.child-row { display: flex; align-items: center; gap: 8px; background: #f9fbf8; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; }
-.child-num { width: 22px; height: 22px; border-radius: 50%; background: var(--green-light); color: var(--green); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.child-label { font-size: 13px; color: var(--muted); flex: 1; }
-.child-age-select { height: 34px; padding: 0 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; color: var(--text); background: var(--white); outline: none; min-width: 90px; }
-.child-age-select:focus { border-color: var(--green); }
-.child-tier { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; flex-shrink: 0; min-width: 64px; text-align: center; }
-.tier-pay  { background: var(--green-light); color: var(--green); border: 1px solid #b3d5ac; }
-.tier-free { background: var(--gold-light); color: #7a5200; border: 1px solid #e0c06a; }
-.btn-remove { width: 26px; height: 26px; border: none; background: transparent; color: #aab; cursor: pointer; font-size: 17px; line-height: 1; border-radius: 6px; flex-shrink: 0; }
-.btn-remove:hover { background: #fee; color: var(--red); }
-.empty-children { font-size: 13px; color: var(--muted); padding: 6px 0; }
+/* CRIANÇAS POR FAIXA */
+.age-group-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.age-group-row { display: flex; align-items: center; gap: 10px; background: #f9fbf8; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; }
+.age-group-label { flex: 1; }
+.age-group-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+.age-group-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
 
 .checkin-note { font-size: 12px; color: var(--muted); background: #f9fbf8; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 18px; line-height: 1.7; }
 .checkin-note strong { color: var(--navy); }
@@ -251,17 +245,16 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
               <div class="cat-sub">Azul, rosa, verde, dourada</div>
             </div>
           </button>
-          <div class="cat-info">
+          <button class="cat-btn cat-primary" onclick="setCategoria('dayuse',this)">
             <div class="cat-dots">
               <span class="dot" style="background:#e53935"></span>
               <span class="dot" style="background:#fb8c00"></span>
             </div>
             <div>
               <div class="cat-name">Chalé Particular</div>
-              <div class="cat-sub">Vermelha ou laranja</div>
-              <span class="cat-tag-info">Day Use / Visitante</span>
+              <div class="cat-sub">Vermelha ou laranja · Day Use / Visitante</div>
             </div>
-          </div>
+          </button>
 
           <hr class="cat-divider">
 
@@ -300,24 +293,42 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
           <span class="badge badge-muted">Selecione as datas</span>
         </div>
 
-        <!-- ADULTOS -->
-        <p class="slabel">Adultos</p>
-        <div class="adults-row">
-          <div class="adults-label">Adultos <span>12 anos ou mais</span></div>
-          <div class="counter">
-            <button onclick="changeAdultos(-1)">−</button>
-            <div class="cnt-val" id="adultos-val">1</div>
-            <button onclick="changeAdultos(1)">+</button>
+        <!-- PESSOAS -->
+        <p class="slabel">Número de pessoas</p>
+        <div class="age-group-list">
+          <div class="age-group-row">
+            <div class="age-group-label">
+              <div class="age-group-name">Adultos</div>
+              <div class="age-group-sub">12 anos ou mais</div>
+            </div>
+            <div class="counter">
+              <button onclick="changeAdultos(-1)">−</button>
+              <div class="cnt-val" id="adultos-val">1</div>
+              <button onclick="changeAdultos(1)">+</button>
+            </div>
           </div>
-        </div>
-
-        <!-- CRIANÇAS -->
-        <div class="children-head">
-          <p class="slabel" style="margin:0">Crianças</p>
-          <button class="btn-add-child" onclick="addCrianca()">+ Adicionar criança</button>
-        </div>
-        <div class="child-list" id="child-list">
-          <div class="empty-children" id="empty-msg">Nenhuma criança adicionada</div>
+          <div class="age-group-row">
+            <div class="age-group-label">
+              <div class="age-group-name">Crianças 6–11 anos</div>
+              <div class="age-group-sub">Tarifa criança</div>
+            </div>
+            <div class="counter">
+              <button onclick="changeGrupo('child',-1)">−</button>
+              <div class="cnt-val" id="val-child">0</div>
+              <button onclick="changeGrupo('child',1)">+</button>
+            </div>
+          </div>
+          <div class="age-group-row">
+            <div class="age-group-label">
+              <div class="age-group-name">Crianças 0–5 anos</div>
+              <div class="age-group-sub">Gratuito</div>
+            </div>
+            <div class="counter">
+              <button onclick="changeGrupo('free',-1)">−</button>
+              <div class="cnt-val" id="val-free">0</div>
+              <button onclick="changeGrupo('free',1)">+</button>
+            </div>
+          </div>
         </div>
 
         <div class="checkin-note">
@@ -351,16 +362,15 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 
 <script>
 const CATS = {
-  padrao:  { label:'Hóspede / Sócio / Proprietário', pulseiras:'Azul, Rosa, Verde, Dourada', adult:320, child:180, discount:true,  meals:['Café da tarde','Jantar','Café da manhã','Almoço'] },
+  padrao:  { label:'Cotista / Sócio / Proprietário', pulseiras:'Azul, Rosa, Verde, Dourada', adult:320, child:180, discount:true,  meals:['Café da tarde','Jantar','Café da manhã','Almoço'] },
   branca:  { label:'Pulseira Branca',                pulseiras:'Branca',                     adult:290, child:150, discount:true,  meals:['Café da tarde','Jantar','Almoço'] },
   amarela: { label:'Pulseira Amarela',               pulseiras:'Amarela',                    adult:170, child:100, discount:false, meals:['Café da tarde','Almoço'] },
-  dayuse:  { label:'Day Use / Visitante',            pulseiras:'Vermelha, Laranja',          adult:400, child:200, discount:true,  meals:['Café da tarde','Jantar','Café da manhã','Almoço'] },
+  dayuse:  { label:'Chalé Particular / Day Use',     pulseiras:'Vermelha, Laranja',          adult:400, child:200, discount:true,  meals:['Café da tarde','Jantar','Café da manhã','Almoço'] },
 };
 
 let cat = 'padrao';
 let adultos = 1;
-let criancas = [];
-let counter = 0;
+let grupos = { free: 0, child: 0 };
 let lastResult = null;
 
 function setCategoria(c, btn) {
@@ -376,38 +386,13 @@ function changeAdultos(d) {
   calcular();
 }
 
+function changeGrupo(grupo, d) {
+  grupos[grupo] = Math.max(0, grupos[grupo] + d);
+  document.getElementById('val-' + grupo).textContent = grupos[grupo];
+  calcular();
+}
+
 function getTier(age) { return age <= 5 ? 'free' : age <= 11 ? 'child' : 'adult'; }
-
-function addCrianca() {
-  counter++;
-  const id = counter;
-  criancas.push({ id, age: 5 });
-  document.getElementById('empty-msg')?.remove();
-  const list = document.getElementById('child-list');
-  const idx = criancas.length;
-  const opts = Array.from({length:18},(_,i)=>`<option value="${i}"${i===5?' selected':''}>${i} ano${i!==1?'s':''}</option>`).join('');
-  const row = document.createElement('div');
-  row.className = 'child-row'; row.id = 'cr-'+id;
-  row.innerHTML = `<span class="child-num">${idx}</span><span class="child-label">Criança ${idx}</span><select class="child-age-select" onchange="updateAge(${id},+this.value)">${opts}</select><span class="child-tier tier-free" id="ct-${id}">Gratuito</span><button class="btn-remove" onclick="removeCrianca(${id})">×</button>`;
-  list.appendChild(row);
-  calcular();
-}
-
-function updateAge(id, age) {
-  const c = criancas.find(x=>x.id===id); if(c) c.age=age;
-  const tier = getTier(age);
-  const el = document.getElementById('ct-'+id);
-  if (el) { el.textContent = tier==='free'?'Gratuito':tier==='child'?'6–11 anos':'12+ anos'; el.className='child-tier '+(tier==='free'?'tier-free':'tier-pay'); }
-  calcular();
-}
-
-function removeCrianca(id) {
-  criancas = criancas.filter(c=>c.id!==id);
-  document.getElementById('cr-'+id)?.remove();
-  document.querySelectorAll('.child-row').forEach((r,i)=>{ r.querySelector('.child-num').textContent=i+1; r.querySelector('.child-label').textContent=`Criança ${i+1}`; });
-  if (!criancas.length) { const m=document.createElement('div'); m.className='empty-children'; m.id='empty-msg'; m.textContent='Nenhuma criança adicionada'; document.getElementById('child-list').appendChild(m); }
-  calcular();
-}
 
 function getDiarias() {
   const ci=document.getElementById('checkin').value, co=document.getElementById('checkout').value;
@@ -424,7 +409,6 @@ function calcular() {
   const p = CATS[cat];
   const infoEl = document.getElementById('diarias-info');
 
-  // badge diárias
   if (!n) {
     infoEl.innerHTML = '<span class="badge badge-muted">Selecione as datas</span>';
   } else {
@@ -437,27 +421,27 @@ function calcular() {
   }
 
   const body = document.getElementById('result-body');
+  const tot_ad   = adultos + 0;
+  const tot_ch   = grupos.child;
+  const tot_free = grupos.free;
+  const temAlguem = tot_ad > 0 || tot_ch > 0 || tot_free > 0;
 
   if (!n) { lastResult=null; body.innerHTML='<div class="empty-result"><div class="empty-icon">📅</div>Selecione as datas de check-in e check-out.</div>'; atualizaBtnPdf(); return; }
-  if (!adultos && !criancas.length) { lastResult=null; body.innerHTML='<div class="empty-result"><div class="empty-icon">👥</div>Adicione pelo menos um hóspede.</div>'; atualizaBtnPdf(); return; }
+  if (!temAlguem) { lastResult=null; body.innerHTML='<div class="empty-result"><div class="empty-icon">👥</div>Adicione pelo menos um hóspede.</div>'; atualizaBtnPdf(); return; }
 
-  const c_free  = criancas.filter(c=>getTier(c.age)==='free');
-  const c_child = criancas.filter(c=>getTier(c.age)==='child');
-  const c_adult = criancas.filter(c=>getTier(c.age)==='adult');
-  const tot_ad  = adultos + c_adult.length;
-  const sub_ad  = tot_ad * p.adult * n;
-  const sub_ch  = c_child.length * p.child * n;
+  const sub_ad   = tot_ad * p.adult * n;
+  const sub_ch   = tot_ch * p.child * n;
   const subtotal = sub_ad + sub_ch;
   const discPct  = n>=5&&p.discount?20:n>=3&&p.discount?10:0;
   const desconto = subtotal * discPct/100;
   const total    = subtotal - desconto;
 
-  lastResult = { n, p, cat, tot_ad, c_child, c_free, sub_ad, sub_ch, subtotal, discPct, desconto, total };
+  lastResult = { n, p, cat, tot_ad, tot_ch, tot_free, sub_ad, sub_ch, subtotal, discPct, desconto, total };
 
   let rows='';
-  if (tot_ad>0)       rows+=`<div class="br-row"><span>${tot_ad} adulto${tot_ad>1?'s':''} × ${fmt(p.adult)} × ${n} diária${n>1?'s':''}</span><span class="val">${fmt(sub_ad)}</span></div>`;
-  if (c_child.length) rows+=`<div class="br-row"><span>${c_child.length} criança${c_child.length>1?'s':''} (6–11) × ${fmt(p.child)} × ${n} diária${n>1?'s':''}</span><span class="val">${fmt(sub_ch)}</span></div>`;
-  if (c_free.length)  rows+=`<div class="br-row free"><span>${c_free.length} criança${c_free.length>1?'s':''} (0–5 anos)</span><span class="val">Gratuito</span></div>`;
+  if (tot_ad>0)   rows+=`<div class="br-row"><span>${tot_ad} adulto${tot_ad>1?'s':''} (12+) × ${fmt(p.adult)} × ${n} diária${n>1?'s':''}</span><span class="val">${fmt(sub_ad)}</span></div>`;
+  if (tot_ch>0)   rows+=`<div class="br-row"><span>${tot_ch} criança${tot_ch>1?'s':''} (6–11) × ${fmt(p.child)} × ${n} diária${n>1?'s':''}</span><span class="val">${fmt(sub_ch)}</span></div>`;
+  if (tot_free>0) rows+=`<div class="br-row free"><span>${tot_free} criança${tot_free>1?'s':''} (0–5 anos)</span><span class="val">Gratuito</span></div>`;
   const discRow = discPct>0 ? `<div class="br-row discount"><span>Desconto ${discPct}% (${n} diárias)</span><span class="val">− ${fmt(desconto)}</span></div>` : '';
   const noDiscNote = cat==='amarela' ? `<div class="no-disc-note">⚠️ Pulseira amarela não possui desconto por quantidade de diárias.</div>` : '';
   const mealsHtml = p.meals.map(m=>`<div class="meal-item">${m}</div>`).join('');
@@ -481,34 +465,28 @@ function atualizaBtnPdf() {
 
 function gerarPdf() {
   if (!lastResult) return;
-  const ci     = document.getElementById('checkin').value;
-  const co     = document.getElementById('checkout').value;
-  const { n, p, tot_ad, c_child, c_free, sub_ad, sub_ch, subtotal, discPct, desconto, total } = lastResult;
+  const ci = document.getElementById('checkin').value;
+  const co = document.getElementById('checkout').value;
+  const { n, p, tot_ad, tot_ch, tot_free, sub_ad, sub_ch, subtotal, discPct, desconto, total } = lastResult;
   const now = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
 
-  // Tabela de itens
   let tRows = '';
-  if (tot_ad>0) tRows+=`<tr><td>Adulto${tot_ad>1?'s':''} (12+ anos)</td><td class="right">${tot_ad}</td><td class="right">${n}</td><td class="right">${fmt(p.adult)}</td><td class="right">${fmt(sub_ad)}</td></tr>`;
-  if (c_child.length) tRows+=`<tr><td>Criança${c_child.length>1?'s':''} (6–11 anos)</td><td class="right">${c_child.length}</td><td class="right">${n}</td><td class="right">${fmt(p.child)}</td><td class="right">${fmt(sub_ch)}</td></tr>`;
-  if (c_free.length)  tRows+=`<tr class="free-row"><td>Criança${c_free.length>1?'s':''} (0–5 anos)</td><td class="right">${c_free.length}</td><td class="right">${n}</td><td class="right">—</td><td class="right">Gratuito</td></tr>`;
-  if (discPct>0)      tRows+=`<tr class="discount-row"><td colspan="4">Desconto ${discPct}% (${n} diárias)</td><td class="right">− ${fmt(desconto)}</td></tr>`;
+  if (tot_ad>0)   tRows+=`<tr><td>Adulto${tot_ad>1?'s':''} (12+ anos)</td><td class="right">${tot_ad}</td><td class="right">${n}</td><td class="right">${fmt(p.adult)}</td><td class="right">${fmt(sub_ad)}</td></tr>`;
+  if (tot_ch>0)   tRows+=`<tr><td>Criança${tot_ch>1?'s':''} (6–11 anos)</td><td class="right">${tot_ch}</td><td class="right">${n}</td><td class="right">${fmt(p.child)}</td><td class="right">${fmt(sub_ch)}</td></tr>`;
+  if (tot_free>0) tRows+=`<tr class="free-row"><td>Criança${tot_free>1?'s':''} (0–5 anos)</td><td class="right">${tot_free}</td><td class="right">${n}</td><td class="right">—</td><td class="right">Gratuito</td></tr>`;
+  if (discPct>0)  tRows+=`<tr class="discount-row"><td colspan="4">Desconto ${discPct}% (${n} diárias)</td><td class="right">− ${fmt(desconto)}</td></tr>`;
 
   const mealsLine = p.meals.map((m,i)=>`<span class="pa-meal-item">${m}</span>${i<p.meals.length-1?'<span class="pa-meal-sep">·</span>':''}`).join('');
-
   const noDiscLine = cat==='amarela' ? '<div class="pa-no-disc">⚠️ Pulseira Amarela não possui desconto por quantidade de diárias.</div>' : '';
 
   document.getElementById('print-area').innerHTML = `
     <div class="pa-header">
-      <div>
-        <img src="logo-chinapark.png" alt="China Park Eco Resort" style="height:56px;display:block;">
-      </div>
+      <div><img src="logo-chinapark.png" alt="China Park Eco Resort" style="height:56px;display:block;"></div>
       <div class="pa-doc-info">
         <div class="pa-doc-title">Cotação de Pensão Completa</div>
         <div class="pa-doc-date">Gerado em ${now}</div>
       </div>
     </div>
-
-
     <div class="pa-section">
       <div class="pa-section-title">Dados da hospedagem</div>
       <div class="pa-info-grid">
@@ -518,7 +496,6 @@ function gerarPdf() {
         <div class="pa-info-item"><div class="lbl">Categoria / Pulseira</div><div class="val">${p.label}</div></div>
       </div>
     </div>
-
     <div class="pa-section">
       <div class="pa-section-title">Composição do valor</div>
       <table class="pa-table">
@@ -526,22 +503,17 @@ function gerarPdf() {
         <tbody>${tRows}</tbody>
       </table>
     </div>
-
     <div class="pa-total"><span class="tl">Total a cobrar</span><span class="tv">${fmt(total)}</span></div>
     ${noDiscLine}
-
     <div class="pa-meals">
       <div class="pa-meals-title">Refeições incluídas por diária</div>
       <div class="pa-meals-list">${mealsLine}</div>
     </div>
-
-
     <div class="pa-footer">
       <span>China Park Eco Resort · uso interno recepção</span>
       <span>Este documento é uma cotação e não substitui a confirmação de reserva.</span>
     </div>
   `;
-
   window.print();
 }
 
@@ -549,8 +521,8 @@ function limpar() {
   document.getElementById('checkin').value='';
   document.getElementById('checkout').value='';
   adultos=1; document.getElementById('adultos-val').textContent='1';
-  criancas=[]; counter=0;
-  document.getElementById('child-list').innerHTML='<div class="empty-children" id="empty-msg">Nenhuma criança adicionada</div>';
+  grupos = { free: 0, child: 0 };
+  ['free','child'].forEach(g => document.getElementById('val-'+g).textContent='0');
   document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   cat='padrao'; lastResult=null;
   calcular();
