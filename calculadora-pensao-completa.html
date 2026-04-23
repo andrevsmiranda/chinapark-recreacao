@@ -95,6 +95,8 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 .badge-green { background: var(--green-light); color: var(--green); border: 1px solid #b3d5ac; }
 .badge-gold  { background: var(--gold-light); color: #7a5200; border: 1px solid #e0c06a; }
 .badge-muted { background: #f0f3f6; color: var(--muted); border: 1px solid var(--border); }
+.badge-especial { background: #fff3e0; color: #b35000; border: 1px solid #ffb74d; }
+.banner-especial { background: #fff8e1; border: 1px solid #ffca28; border-left: 4px solid #f9a825; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; color: #5d4037; line-height: 1.6; margin-bottom: 16px; }
 
 /* ADULTOS */
 .adults-row { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
@@ -368,6 +370,21 @@ const CATS = {
   dayuse:  { label:'Chalé Particular / Day Use',     pulseiras:'Vermelha, Laranja',          adult:400, child:200, discount:true,  meals:['Café da tarde','Jantar','Café da manhã','Almoço'] },
 };
 
+// Preços especiais – Jantar Japonês 25/04
+const CATS_ESPECIAL = {
+  padrao:  { label:'Cotista / Sócio / Proprietário', pulseiras:'Azul, Rosa, Verde, Dourada', adult:360, child:200, discount:true,  meals:['Café da tarde','🍣 Jantar Especial Japonês','Café da manhã','Almoço'] },
+  branca:  { label:'Pulseira Branca',                pulseiras:'Branca',                     adult:330, child:120, discount:true,  meals:['Café da tarde','🍣 Jantar Especial Japonês','Almoço'] },
+  amarela: { label:'Pulseira Amarela',               pulseiras:'Amarela',                    adult:170, child:100, discount:false, meals:['Café da tarde','Almoço'] },
+  dayuse:  { label:'Chalé Particular / Day Use',     pulseiras:'Vermelha, Laranja',          adult:450, child:220, discount:true,  meals:['Café da tarde','🍣 Jantar Especial Japonês','Café da manhã','Almoço'] },
+};
+
+function isDataEspecial() {
+  const ci = document.getElementById('checkin').value;
+  if (!ci) return false;
+  const [, m, d] = ci.split('-');
+  return m === '04' && d === '25';
+}
+
 let cat = 'padrao';
 let adultos = 1;
 let grupos = { free: 0, child: 0 };
@@ -406,7 +423,8 @@ function fmtDate(s) { if(!s) return '—'; const [y,m,d]=s.split('-'); return `$
 
 function calcular() {
   const n = getDiarias();
-  const p = CATS[cat];
+  const especial = isDataEspecial();
+  const p = (especial ? CATS_ESPECIAL : CATS)[cat];
   const infoEl = document.getElementById('diarias-info');
 
   if (!n) {
@@ -414,10 +432,25 @@ function calcular() {
   } else {
     let disc = n>=5&&p.discount?20:n>=3&&p.discount?10:0;
     let html = `<span class="badge badge-green">📅 ${n} diária${n>1?'s':''}</span>`;
+    if (especial) html += '<span class="badge badge-especial">🍣 Jantar Especial Japonês</span>';
     html += !p.discount ? '<span class="badge badge-gold">sem desconto (pulseira amarela)</span>'
           : disc>0      ? `<span class="badge badge-green">🏷 ${disc}% de desconto</span>`
           :               '<span class="badge badge-muted">desconto a partir de 3 diárias</span>';
     infoEl.innerHTML = html;
+  }
+
+  // Banner aviso data especial
+  let bannerEl = document.getElementById('banner-especial');
+  if (especial && n) {
+    if (!bannerEl) {
+      bannerEl = document.createElement('div');
+      bannerEl.id = 'banner-especial';
+      bannerEl.className = 'banner-especial';
+      document.getElementById('diarias-info').after(bannerEl);
+    }
+    bannerEl.innerHTML = `<strong>🍣 25/04 – Jantar Especial Japonês</strong><br>Valores de pensão ajustados para esta data. Informe ao cliente que o buffet terá opções variadas além da culinária japonesa.`;
+  } else if (bannerEl) {
+    bannerEl.remove();
   }
 
   const body = document.getElementById('result-body');
