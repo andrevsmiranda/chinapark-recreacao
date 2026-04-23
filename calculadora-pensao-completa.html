@@ -380,9 +380,13 @@ const CATS_ESPECIAL = {
 
 function isDataEspecial() {
   const ci = document.getElementById('checkin').value;
-  if (!ci) return false;
-  const [, m, d] = ci.split('-');
-  return m === '04' && d === '25';
+  const co = document.getElementById('checkout').value;
+  if (!ci || !co) return false;
+  const especial = new Date('2026-04-25T00:00:00');
+  const checkin  = new Date(ci + 'T00:00:00');
+  const checkout = new Date(co + 'T00:00:00');
+  // Aplica se o dia 25/04 está dentro da estadia (check-in <= 25/04 < check-out)
+  return checkin <= especial && especial < checkout;
 }
 
 let cat = 'padrao';
