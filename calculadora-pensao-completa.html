@@ -382,11 +382,24 @@ function isDataEspecial() {
   const ci = document.getElementById('checkin').value;
   const co = document.getElementById('checkout').value;
   if (!ci || !co) return false;
-  const especial = new Date('2026-04-25T00:00:00');
   const checkin  = new Date(ci + 'T00:00:00');
   const checkout = new Date(co + 'T00:00:00');
-  // Aplica se o dia 25/04 está dentro da estadia (check-in <= 25/04 < check-out)
-  return checkin <= especial && especial < checkout;
+  const especial = new Date('2026-04-25T00:00:00');
+  return checkin <= especial && checkout > especial;
+}
+
+function getDiariasEspecial() {
+  // Retorna { normal: N, especial: N } — quantas diárias de cada tipo
+  const ci = document.getElementById('checkin').value;
+  const co = document.getElementById('checkout').value;
+  if (!ci || !co) return null;
+  const checkin  = new Date(ci + 'T00:00:00');
+  const checkout = new Date(co + 'T00:00:00');
+  const total = Math.round((checkout - checkin) / 86400000);
+  if (total <= 0) return null;
+  const especial = new Date('2026-04-25T00:00:00');
+  const temEspecial = checkin <= especial && checkout > especial;
+  return { total, especial: temEspecial ? 1 : 0, normal: temEspecial ? total - 1 : total };
 }
 
 let cat = 'padrao';
@@ -416,10 +429,8 @@ function changeGrupo(grupo, d) {
 function getTier(age) { return age <= 5 ? 'free' : age <= 11 ? 'child' : 'adult'; }
 
 function getDiarias() {
-  const ci=document.getElementById('checkin').value, co=document.getElementById('checkout').value;
-  if(!ci||!co) return null;
-  const d=Math.round((new Date(co+'T00:00:00')-new Date(ci+'T00:00:00'))/86400000);
-  return d>0?d:null;
+  const d = getDiariasEspecial();
+  return d ? d.total : null;
 }
 
 function fmt(v) { return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2}); }
@@ -458,7 +469,7 @@ function calcular() {
   }
 
   const body = document.getElementById('result-body');
-  const tot_ad   = adultos + 0;
+  const tot_ad   = adultos;
   const tot_ch   = grupos.child;
   const tot_free = grupos.free;
   const temAlguem = tot_ad > 0 || tot_ch > 0 || tot_free > 0;
@@ -466,22 +477,33 @@ function calcular() {
   if (!n) { lastResult=null; body.innerHTML='<div class="empty-result"><div class="empty-icon">📅</div>Selecione as datas de check-in e check-out.</div>'; atualizaBtnPdf(); return; }
   if (!temAlguem) { lastResult=null; body.innerHTML='<div class="empty-result"><div class="empty-icon">👥</div>Adicione pelo menos um hóspede.</div>'; atualizaBtnPdf(); return; }
 
-  const sub_ad   = tot_ad * p.adult * n;
-  const sub_ch   = tot_ch * p.child * n;
+  const split    = getDiariasEspecial();
+  const pNorm    = CATS[cat];
+  const pEsp     = CATS_ESPECIAL[cat];
+
+  const sub_ad_norm = tot_ad * pNorm.adult * split.normal;
+  const sub_ch_norm = tot_ch * pNorm.child * split.normal;
+  const sub_ad_esp  = tot_ad * pEsp.adult  * split.especial;
+  const sub_ch_esp  = tot_ch * pEsp.child  * split.especial;
+
+  const sub_ad   = sub_ad_norm + sub_ad_esp;
+  const sub_ch   = sub_ch_norm + sub_ch_esp;
   const subtotal = sub_ad + sub_ch;
-  const discPct  = n>=5&&p.discount?20:n>=3&&p.discount?10:0;
+  const discPct  = n>=5&&pNorm.discount?20:n>=3&&pNorm.discount?10:0;
   const desconto = subtotal * discPct/100;
   const total    = subtotal - desconto;
 
-  lastResult = { n, p, cat, tot_ad, tot_ch, tot_free, sub_ad, sub_ch, subtotal, discPct, desconto, total };
+  lastResult = { n, split, pNorm, pEsp, cat, tot_ad, tot_ch, tot_free, sub_ad_norm, sub_ch_norm, sub_ad_esp, sub_ch_esp, sub_ad, sub_ch, subtotal, discPct, desconto, total };
 
   let rows='';
-  if (tot_ad>0)   rows+=`<div class="br-row"><span>${tot_ad} adulto${tot_ad>1?'s':''} (12+) × ${fmt(p.adult)} × ${n} diária${n>1?'s':''}</span><span class="val">${fmt(sub_ad)}</span></div>`;
-  if (tot_ch>0)   rows+=`<div class="br-row"><span>${tot_ch} criança${tot_ch>1?'s':''} (6–11) × ${fmt(p.child)} × ${n} diária${n>1?'s':''}</span><span class="val">${fmt(sub_ch)}</span></div>`;
+  if (tot_ad>0 && split.normal>0)   rows+=`<div class="br-row"><span>${tot_ad} adulto${tot_ad>1?'s':''} × ${fmt(pNorm.adult)} × ${split.normal} diária${split.normal>1?'s':''}</span><span class="val">${fmt(sub_ad_norm)}</span></div>`;
+  if (tot_ad>0 && split.especial>0) rows+=`<div class="br-row"><span>${tot_ad} adulto${tot_ad>1?'s':''} × ${fmt(pEsp.adult)} × 1 diária <span style="color:#b35000;font-size:11px">🍣 25/04</span></span><span class="val">${fmt(sub_ad_esp)}</span></div>`;
+  if (tot_ch>0 && split.normal>0)   rows+=`<div class="br-row"><span>${tot_ch} criança${tot_ch>1?'s':''} (6–11) × ${fmt(pNorm.child)} × ${split.normal} diária${split.normal>1?'s':''}</span><span class="val">${fmt(sub_ch_norm)}</span></div>`;
+  if (tot_ch>0 && split.especial>0) rows+=`<div class="br-row"><span>${tot_ch} criança${tot_ch>1?'s':''} (6–11) × ${fmt(pEsp.child)} × 1 diária <span style="color:#b35000;font-size:11px">🍣 25/04</span></span><span class="val">${fmt(sub_ch_esp)}</span></div>`;
   if (tot_free>0) rows+=`<div class="br-row free"><span>${tot_free} criança${tot_free>1?'s':''} (0–5 anos)</span><span class="val">Gratuito</span></div>`;
   const discRow = discPct>0 ? `<div class="br-row discount"><span>Desconto ${discPct}% (${n} diárias)</span><span class="val">− ${fmt(desconto)}</span></div>` : '';
   const noDiscNote = cat==='amarela' ? `<div class="no-disc-note">⚠️ Pulseira amarela não possui desconto por quantidade de diárias.</div>` : '';
-  const mealsHtml = p.meals.map(m=>`<div class="meal-item">${m}</div>`).join('');
+  const mealsHtml = pNorm.meals.map(m=>`<div class="meal-item">${m}</div>`).join('');
 
   body.innerHTML = `
     <div>${rows}${discRow}</div>
@@ -504,16 +526,18 @@ function gerarPdf() {
   if (!lastResult) return;
   const ci = document.getElementById('checkin').value;
   const co = document.getElementById('checkout').value;
-  const { n, p, tot_ad, tot_ch, tot_free, sub_ad, sub_ch, subtotal, discPct, desconto, total } = lastResult;
+  const { n, split, pNorm, pEsp, tot_ad, tot_ch, tot_free, sub_ad_norm, sub_ch_norm, sub_ad_esp, sub_ch_esp, discPct, desconto, total } = lastResult;
   const now = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
 
   let tRows = '';
-  if (tot_ad>0)   tRows+=`<tr><td>Adulto${tot_ad>1?'s':''} (12+ anos)</td><td class="right">${tot_ad}</td><td class="right">${n}</td><td class="right">${fmt(p.adult)}</td><td class="right">${fmt(sub_ad)}</td></tr>`;
-  if (tot_ch>0)   tRows+=`<tr><td>Criança${tot_ch>1?'s':''} (6–11 anos)</td><td class="right">${tot_ch}</td><td class="right">${n}</td><td class="right">${fmt(p.child)}</td><td class="right">${fmt(sub_ch)}</td></tr>`;
+  if (tot_ad>0 && split.normal>0)   tRows+=`<tr><td>Adulto${tot_ad>1?'s':''} (12+ anos)</td><td class="right">${tot_ad}</td><td class="right">${split.normal}</td><td class="right">${fmt(pNorm.adult)}</td><td class="right">${fmt(sub_ad_norm)}</td></tr>`;
+  if (tot_ad>0 && split.especial>0) tRows+=`<tr><td>Adulto${tot_ad>1?'s':''} – 🍣 Jantar Japonês (25/04)</td><td class="right">${tot_ad}</td><td class="right">1</td><td class="right">${fmt(pEsp.adult)}</td><td class="right">${fmt(sub_ad_esp)}</td></tr>`;
+  if (tot_ch>0 && split.normal>0)   tRows+=`<tr><td>Criança${tot_ch>1?'s':''} (6–11 anos)</td><td class="right">${tot_ch}</td><td class="right">${split.normal}</td><td class="right">${fmt(pNorm.child)}</td><td class="right">${fmt(sub_ch_norm)}</td></tr>`;
+  if (tot_ch>0 && split.especial>0) tRows+=`<tr><td>Criança${tot_ch>1?'s':''} (6–11) – 🍣 Jantar Japonês (25/04)</td><td class="right">${tot_ch}</td><td class="right">1</td><td class="right">${fmt(pEsp.child)}</td><td class="right">${fmt(sub_ch_esp)}</td></tr>`;
   if (tot_free>0) tRows+=`<tr class="free-row"><td>Criança${tot_free>1?'s':''} (0–5 anos)</td><td class="right">${tot_free}</td><td class="right">${n}</td><td class="right">—</td><td class="right">Gratuito</td></tr>`;
   if (discPct>0)  tRows+=`<tr class="discount-row"><td colspan="4">Desconto ${discPct}% (${n} diárias)</td><td class="right">− ${fmt(desconto)}</td></tr>`;
 
-  const mealsLine = p.meals.map((m,i)=>`<span class="pa-meal-item">${m}</span>${i<p.meals.length-1?'<span class="pa-meal-sep">·</span>':''}`).join('');
+  const mealsLine = pNorm.meals.map((m,i)=>`<span class="pa-meal-item">${m}</span>${i<pNorm.meals.length-1?'<span class="pa-meal-sep">·</span>':''}`).join('');
   const noDiscLine = cat==='amarela' ? '<div class="pa-no-disc">⚠️ Pulseira Amarela não possui desconto por quantidade de diárias.</div>' : '';
 
   document.getElementById('print-area').innerHTML = `
