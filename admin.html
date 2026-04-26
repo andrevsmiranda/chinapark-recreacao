@@ -39,6 +39,10 @@ html,body{min-height:100%;font-family:'Nunito',sans-serif;background:var(--cream
 .dpill.active{background:var(--navy);color:#fff;border-color:var(--navy)}
 .dpill.today{border-color:var(--gold);color:var(--navy)}
 .dpill.active.today{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.dpill.feriado{border-color:#C06000;color:#C06000}
+.dpill.active.feriado{background:#C06000;color:#fff;border-color:#C06000}
+.fer-toggle{flex-shrink:0;padding:4px 11px;border-radius:20px;border:1.5px dashed var(--gold);font-size:11px;font-weight:800;cursor:pointer;background:none;color:var(--gold);font-family:'Nunito',sans-serif;margin-left:6px}
+.fer-toggle.on{background:var(--gold);color:var(--navy)}
 /* REC BAR */
 .rec-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--cream);border-bottom:1px solid var(--border)}
 .rec-bar label{font-size:10px;font-weight:800;color:var(--muted);flex-shrink:0}
@@ -148,6 +152,9 @@ textarea.fij{resize:vertical;min-height:50px;font-size:11px}
 
     <!-- DAY BAR -->
     <div class="day-bar" id="adm-days"></div>
+    <div class="day-bar" id="fer-bar" style="padding-top:0;padding-bottom:6px;display:none">
+      <button class="fer-toggle" id="fer-btn" onclick="toggleFeriado()"></button>
+    </div>
 
     <!-- REC BAR -->
     <div class="rec-bar" id="rec-bar">
@@ -202,9 +209,67 @@ var SPLIT_DAYS=[5,6,0];
 function sf(f){ return f==='infantil'?'46':f; }
 // Days shown per faixa
 function daysForFaixa(f){
-  if(f==='infantil') return INFANTIL_DAYS;
-  if(f==='46'||f==='712') return SPLIT_DAYS;
+  if(f==='infantil'){
+    // Seg-Qui EXCETO dias marcados como feriado
+    return INFANTIL_DAYS.filter(function(d){return feriados.indexOf(d)===-1;});
+  }
+  if(f==='46'||f==='712'){
+    // Sex-Dom + dias de semana marcados como feriado
+    var ferDias=INFANTIL_DAYS.filter(function(d){return feriados.indexOf(d)!==-1;});
+    var todos=SPLIT_DAYS.concat(ferDias);
+    // Ordena conforme ORDER
+    return ORDER.filter(function(d){return todos.indexOf(d)!==-1;});
+  }
   return ORDER;
+}
+
+// Toggle feriado para o dia atual
+function toggleFeriado(){
+  var idx=feriados.indexOf(aDay);
+  if(idx===-1){
+    // Marcar como feriado
+    feriados.push(aDay);
+    saveFeriados(feriados);
+    // Se estamos em infantil, mudar para '46' e ir ao mesmo dia
+    if(curFaixa==='infantil'){
+      collectCurrentView();
+      curFaixa='46';
+      document.getElementById('fsel').value='46';
+    }
+  } else {
+    // Remover feriado
+    feriados.splice(idx,1);
+    saveFeriados(feriados);
+    // Se estamos em 46/712 e o dia ficou sem dias, voltar para infantil
+    if(curFaixa==='46'||curFaixa==='712'){
+      collectCurrentView();
+      curFaixa='infantil';
+      document.getElementById('fsel').value='infantil';
+      aDay=aDay; // mantém o mesmo dia
+    }
+  }
+  renderAdmin();
+}
+
+// Atualiza o botão de feriado conforme contexto
+function updateFerBar(){
+  var ferBar=document.getElementById('fer-bar');
+  var ferBtn=document.getElementById('fer-btn');
+  var f=curFaixa;
+  // Mostra apenas para faixas infantis, em dias de semana
+  var diaUtil=INFANTIL_DAYS.indexOf(aDay)!==-1;
+  var diaFeriado=feriados.indexOf(aDay)!==-1;
+  var showBar=false;
+  if(f==='infantil' && diaUtil){
+    showBar=true;
+    ferBtn.textContent='🎉 Marcar como Feriado';
+    ferBtn.className='fer-toggle';
+  } else if((f==='46'||f==='712') && diaFeriado){
+    showBar=true;
+    ferBtn.textContent='✕ Remover Feriado';
+    ferBtn.className='fer-toggle on';
+  }
+  ferBar.style.display=showBar?'flex':'none';
 }
 
 // ── BASE DATA ────────────────────────────────────────────────────
@@ -239,6 +304,13 @@ var jantares=loadJT();
 var aDay=new Date().getDay();
 var curFaixa='adulto'; // always track current faixa explicitly
 var inPrint=false;
+
+// ── FERIADOS ─────────────────────────────────────────────────────
+// Dias da semana marcados como feriado (ex: [1,4] = Seg e Qui)
+var SK_FER='cp_feriados';
+function loadFeriados(){try{var x=localStorage.getItem(SK_FER);if(x)return JSON.parse(x);}catch(e){}return[];}
+function saveFeriados(arr){try{localStorage.setItem(SK_FER,JSON.stringify(arr));}catch(e){}}
+var feriados=loadFeriados();
 
 // ── AUTH ─────────────────────────────────────────────────────────
 function doLogin(){
@@ -313,8 +385,9 @@ function renderAdmin(){
   if(!isJ){
     days.forEach(function(d){
       var b=document.createElement('button');
-      b.className='dpill'+(d===aDay?' active':'')+(d===today?' today':'');
-      b.textContent=DS[d]+(d===today?' *':'');
+      var isFer=feriados.indexOf(d)!==-1;
+      b.className='dpill'+(d===aDay?' active':'')+(d===today?' today':'')+(isFer?' feriado':'');
+      b.textContent=DS[d]+(d===today?' *':'')+(isFer?' 🎉':'');
       b.onclick=(function(dd){
         return function(){
           collectCurrentView();
@@ -327,6 +400,8 @@ function renderAdmin(){
   }
 
   // Toggle sections
+  // Feriado bar
+  updateFerBar();
   document.getElementById('adm-days').style.display=isJ?'none':'flex';
   document.getElementById('rec-bar').style.display=isJ?'none':'flex';
   document.getElementById('tbl-wrap').style.display=isJ?'none':'block';
