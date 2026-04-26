@@ -128,10 +128,10 @@
   }
   .month-col {
     border-radius: 8px;
-    padding: 10px 8px;
+    padding: 8px 6px;
     background: #FAFAFE;
     border: 1px solid var(--line);
-    min-height: 140px;
+    min-height: 100px;
     cursor: pointer;
     transition: all 0.15s ease;
   }
@@ -142,8 +142,8 @@
     box-shadow: 0 6px 16px rgba(20, 20, 60, 0.10);
   }
   .month-col h3 {
-    margin: 0 0 8px;
-    font-size: 12px;
+    margin: 0 0 6px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--navy);
     text-transform: uppercase;
@@ -151,14 +151,13 @@
   }
   .month-col .pkg-pill {
     display: block;
-    padding: 4px 6px;
-    font-size: 11px;
+    padding: 3px 6px;
+    font-size: 10px;
+    line-height: 1.25;
     border-radius: 4px;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     color: white;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    word-break: break-word;
     cursor: pointer;
   }
   .month-col .pkg-pill:hover { filter: brightness(1.1); }
@@ -229,7 +228,7 @@
   }
   .cal-grid .day {
     background: var(--white);
-    min-height: 80px;
+    min-height: 68px;
     padding: 4px 6px;
     position: relative;
     font-size: 12px;
@@ -250,12 +249,12 @@
   }
   .day-bar {
     position: relative;
-    margin-top: 3px;
+    margin-top: 2px;
     padding: 2px 6px;
     border-radius: 3px;
     color: white;
-    font-size: 10px;
-    line-height: 1.2;
+    font-size: 9px;
+    line-height: 1.25;
     cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -266,11 +265,11 @@
   /* List card */
   .list-card .month-header h2 { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
   .pkg-list {
-    padding: 10px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    max-height: 600px;
+    gap: 4px;
+    max-height: 820px;
     overflow-y: auto;
   }
   .pkg-card {
@@ -308,7 +307,7 @@
   .badge-st-atrasado     { background: #F8D7DA; color: #A1232C; }
 
   /* Buckets do mês */
-  .bucket { padding: 4px 10px 8px; }
+  .bucket { padding: 4px 8px 6px; }
   .bucket-header {
     display: flex; align-items: center; gap: 8px;
     padding: 10px 4px 6px;
@@ -340,7 +339,7 @@
   }
   .pkg-mini {
     display: flex; gap: 8px; align-items: center;
-    padding: 7px 10px;
+    padding: 6px 9px;
     border: 1px solid var(--line);
     border-left: 4px solid var(--cat-feriado);
     border-radius: 6px;
@@ -572,15 +571,67 @@
   }
 
   /* Mobile tweaks */
-  @media (max-width: 720px) {
-    header.app { padding: 14px 16px; }
-    header.app h1 { font-size: 15px; }
-    .toolbar { padding: 10px 16px; }
-    main { padding: 14px 16px 40px; }
-    .months-grid { grid-template-columns: repeat(3, 1fr); }
-    .panel { width: 100%; padding: 18px; }
-    .cal-grid .day { min-height: 56px; }
-    .day-bar { font-size: 9px; padding: 1px 4px; }
+  @media (max-width: 900px) {
+    /* Header compacto */
+    header.app { padding: 12px 14px; flex-direction: column; align-items: flex-start; gap: 4px; }
+    header.app h1 { font-size: 14px; }
+    header.app .sub { font-size: 11px; }
+    header.app .stat { display: none; }
+
+    /* Toolbar simplificada */
+    .toolbar { padding: 10px 14px; gap: 8px; }
+    .toolbar .group { flex: 1; min-width: 0; }
+    .toolbar select { font-size: 12px; padding: 7px 10px; width: 100%; }
+    .toolbar label { font-size: 10px; }
+    .toolbar .legend { display: none; }
+    .toolbar .toolbar-actions { width: 100%; }
+
+    main { padding: 12px 14px 40px; }
+
+    /* Esconder year strip — pouco útil em tela pequena */
+    .year-strip { display: none; }
+
+    /* Lista lateral vira PRINCIPAL e vem primeiro */
+    .month-view {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .month-view .list-card { order: 1; }
+    .month-view .calendar-card { order: 2; }
+
+    /* Calendário grid mais compacto */
+    .month-header { padding: 12px 14px; }
+    .month-header h2 { font-size: 15px; }
+    .cal-grid .dow { font-size: 9px; padding: 6px 2px; }
+    .cal-grid .day { min-height: 48px; padding: 3px 3px; font-size: 10px; }
+    .cal-grid .day .day-num { font-size: 11px; }
+    .day-bar { font-size: 8px; padding: 1px 3px; line-height: 1.2; margin-top: 1px; }
+
+    /* Lista — cards maiores pra dedo */
+    .pkg-list { max-height: none; padding: 6px; gap: 4px; }
+    .pkg-mini { padding: 10px 12px; }
+    .pkg-mini .nome { font-size: 13px; line-height: 1.3; }
+    .pkg-mini .periodo { font-size: 11px; }
+
+    /* Buckets */
+    .bucket { padding: 4px 6px 8px; }
+    .bucket-header { padding: 12px 4px 8px; }
+    .bucket-name { font-size: 12px; }
+    .bucket-count { font-size: 11px; padding: 2px 9px; }
+
+    /* Painel lateral 100% (slide-up no mobile faz mais sentido, mas mantém slide-right) */
+    .panel { width: 100%; padding: 20px; }
+    .panel h2 { font-size: 18px; }
+    .copy-btn { width: 100%; padding: 12px; font-size: 13px; }
+    .link-block { font-size: 10px; }
+    .panel-actions button { flex: 1; padding: 10px; font-size: 13px; }
+  }
+
+  @media (max-width: 480px) {
+    header.app h1 { font-size: 13px; }
+    header.app .sub { display: none; }
+    .toolbar { flex-wrap: wrap; }
+    .month-header h2 { font-size: 14px; }
   }
 </style>
 </head>
