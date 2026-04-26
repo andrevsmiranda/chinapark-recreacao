@@ -100,11 +100,9 @@ html,body{min-height:100%;font-family:'Nunito',sans-serif;color:var(--text);back
 </div>
 
 <script>
-const URL = 'https://fdgbdpzhmklypepvbhmr.supabase.co/rest/v1/brinquedao';
-const KEY = 'sb_publishable_V4eHa9yR5CeNdlX0yUMJ9w_clCMwT3p';
-const HDR = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'};
+const SK = 'cp_brinquedao';
 
-async function submitCadastro(){
+function submitCadastro(){
   const child  = document.getElementById('c-child').value.trim();
   const age    = document.getElementById('c-age').value.trim();
   const parent = document.getElementById('c-parent').value.trim();
@@ -116,16 +114,12 @@ async function submitCadastro(){
   if(phone.length<10){showErr('WhatsApp do 1º responsável inválido. Use DDD + número.');return;}
   if((parent2||phone2)&&phone2.length<10){showErr('WhatsApp do 2º responsável inválido. Use DDD + número.');return;}
 
-  const btn=document.getElementById('btn-confirm');
-  btn.style.display='none';
-  document.getElementById('form-section').insertAdjacentHTML('beforeend','<div class="loading" id="loading-bar">Salvando...</div>');
-
-  const data={child,age:+age,parent,phone};
-  if(parent2&&phone2){data.parent2=parent2;data.phone2=phone2;}
-
   try{
-    const r=await fetch(URL,{method:'POST',headers:HDR,body:JSON.stringify(data)});
-    if(!r.ok)throw new Error(await r.text());
+    const kids=JSON.parse(localStorage.getItem(SK)||'[]');
+    const data={child,age:+age,parent,phone,id:Date.now(),created_at:new Date().toISOString()};
+    if(parent2&&phone2){data.parent2=parent2;data.phone2=phone2;}
+    kids.push(data);
+    localStorage.setItem(SK,JSON.stringify(kids));
     document.getElementById('form-section').style.display='none';
     let txt=child+' está registrado!';
     if(parent2&&phone2)txt+=' Os responsáveis '+parent+' e '+parent2+' poderão ser chamados pelo WhatsApp se necessário.';
@@ -133,9 +127,7 @@ async function submitCadastro(){
     document.getElementById('ok-text').textContent=txt;
     document.getElementById('ok-section').style.display='block';
   }catch(e){
-    document.getElementById('loading-bar')?.remove();
-    btn.style.display='block';
-    showErr('Erro ao salvar. Verifique sua conexão e tente novamente.');
+    showErr('Erro ao salvar: '+e.message);
   }
 }
 

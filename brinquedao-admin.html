@@ -203,9 +203,23 @@ html,body{min-height:100%;font-family:'Nunito',sans-serif;color:var(--text);back
 
 <script>
 const PASS = 'china2024';
-const URL  = 'https://fdgbdpzhmklypepvbhmr.supabase.co/rest/v1/brinquedao';
-const KEY  = 'sb_publishable_V4eHa9yR5CeNdlX0yUMJ9w_clCMwT3p';
-const HDR  = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+const SK   = 'cp_brinquedao';
+
+// ── localStorage helpers ─────────────────────────────────────────
+function _load(){ try{return JSON.parse(localStorage.getItem(SK)||'[]');}catch(e){return[];} }
+function _save(arr){ localStorage.setItem(SK, JSON.stringify(arr)); }
+
+async function loadKids(){
+  return _load().sort((a,b)=>a.created_at>b.created_at?1:-1);
+}
+async function addKid(data){
+  const kids=_load();
+  kids.push({...data, id:Date.now(), created_at:new Date().toISOString()});
+  _save(kids);
+}
+async function removeKid(id){
+  _save(_load().filter(k=>k.id!=id));
+}
 
 function doLogin(){
   if(document.getElementById('pw').value===PASS){
@@ -220,22 +234,6 @@ function doLogout(){
   document.getElementById('panel').style.display='none';
   document.getElementById('lock').style.display='flex';
   document.getElementById('pw').value='';
-}
-
-async function loadKids(){
-  const r=await fetch(URL+'?select=*&order=created_at.asc',{headers:HDR});
-  if(!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-
-async function addKid(data){
-  const r=await fetch(URL,{method:'POST',headers:{...HDR,'Prefer':'return=minimal'},body:JSON.stringify(data)});
-  if(!r.ok) throw new Error(await r.text());
-}
-
-async function removeKid(id){
-  const r=await fetch(URL+'?id=eq.'+id,{method:'DELETE',headers:HDR});
-  if(!r.ok) throw new Error(await r.text());
 }
 
 const COLORS=[['rgba(26,32,64,.1)','#1A2040'],['rgba(240,160,20,.18)','#7A4F00'],['rgba(46,125,82,.12)','#1B6B45'],['rgba(192,57,43,.1)','#8B1A10'],['rgba(107,100,128,.12)','#3D375A']];
