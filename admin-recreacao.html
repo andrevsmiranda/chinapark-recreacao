@@ -27,6 +27,15 @@ html,body{min-height:100%;font-family:'Nunito',sans-serif;background:var(--cream
 .topbar-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--gold)}
 .btn-logout{font-size:11px;color:rgba(255,255,255,.45);background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700}
 /* FAIXA BAR */
+.semana-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:#F3EEE8;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap}
+.semana-bar::-webkit-scrollbar{display:none}
+.semana-bar .bs-lbl{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.06em;flex-shrink:0}
+.semana-bar .bs-tab{border:1px solid var(--border);background:#fff;border-radius:8px;padding:7px 13px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:#2F3855;white-space:nowrap}
+.semana-bar .bs-tab.on{background:#2F3855;color:#fff;border-color:#2F3855}
+.semana-bar .bs-info{font-size:12px;color:var(--muted);margin-left:4px}
+.semana-bar .bs-acao{margin-left:auto;border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 11px;font-family:inherit;font-size:12px;cursor:pointer;color:#2F3855;white-space:nowrap}
+.semana-bar .bs-acao+.bs-acao{margin-left:0}
+.semana-bar.editando-outra{background:#FFF4E0;border-bottom-color:#F7B846}
 .faixa-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--white);overflow-x:auto;scrollbar-width:none}
 .faixa-bar::-webkit-scrollbar{display:none}
 .faixa-bar label{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.06em;flex-shrink:0}
@@ -107,7 +116,7 @@ textarea.fij{resize:vertical;min-height:50px;font-size:11px}
 @media print{
   @page{size:A4;margin:1.2cm 1.5cm}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .topbar,.faixa-bar,.day-bar,.rec-bar,.tbl-wrap,.j-wrap,.botbar{display:none!important}
+  .topbar,.faixa-bar,.semana-bar,.day-bar,.rec-bar,.tbl-wrap,.j-wrap,.botbar{display:none!important}
   .print-area{display:block!important;padding:0;background:#fff!important}
   .app{box-shadow:none}
   .pdf{max-width:100%}
@@ -137,6 +146,9 @@ textarea.fij{resize:vertical;min-height:50px;font-size:11px}
       <div class="topbar-title">🎪 Recreação – Admin</div>
       <a class="btn-logout" href="/admin" style="text-decoration:none;display:inline-flex;align-items:center;margin-right:8px">← Portal</a><button class="btn-logout" onclick="doLogout()">Sair</button>
     </div>
+
+    <!-- SEMANA P1/P2 -->
+    <div class="semana-bar" id="barra-semana"></div>
 
     <!-- FAIXA SELECT -->
     <div class="faixa-bar" id="faixa-bar">
@@ -194,6 +206,7 @@ textarea.fij{resize:vertical;min-height:50px;font-size:11px}
   </div>
 </div>
 
+<script src="/lib/semanas.js"></script>
 <script>
 // ── CONSTANTS ────────────────────────────────────────────────────
 var SK='cp_v6';
@@ -276,11 +289,9 @@ var BASE={adulto:{1:{rec:'Tio Bananinho',a:[{t:'08:30',n:'Café da manhã com os
 var BASE_JT={0:{t:'Eita, to na festa errada',d:'Vista-se de algo completamente fora do contexto!',h:'19:30'},1:{t:'Óculos Divertido',d:'Capriche nos óculos mais divertido que você tiver!',h:'19:45'},2:{t:'Times',d:'Vista a camisa do seu time do coração.',h:'19:45'},3:{t:'Brega ou Chique',d:'Escolha: o máximo do brega ou o máximo do chique.',h:'19:45'},4:{t:'Sapato Trocado',d:'Vista os sapatos nos pés trocados!',h:'19:45'},5:{t:'Divertidamente',d:'Venha como um personagem do filme Divertidamente.',h:'19:30'},6:{t:'Cabelo Maluco',d:'O penteado mais criativo e maluco vence!',h:'19:30'}};
 
 // ── STATE ────────────────────────────────────────────────────────
-function loadState(){
-  try{
-    var x=localStorage.getItem(SK);
-    if(x) return JSON.parse(JSON.stringify(JSON.parse(x)));
-  }catch(e){}
+// Duas grades alternadas: PROG guarda as duas; aState aponta para a que está sendo editada.
+var PROG=null, editando='p1';
+function gradePadrao(){
   var s={};
   ['adulto','712','46'].forEach(function(f){
     s[f]={};
@@ -290,7 +301,66 @@ function loadState(){
   });
   return s;
 }
-function saveState(snap){ try{localStorage.setItem(SK,JSON.stringify(snap));}catch(e){} }
+function aplicarProgramacao(dados){
+  PROG=CPSemanas.normalizar(dados,['adulto','712','46'],gradePadrao());
+  if(!editandoForcado) editando=CPSemanas.semanaVigente(PROG.ancora);
+  return PROG[editando];
+}
+var editandoForcado=false;
+function loadState(){
+  var salvo=null;
+  try{var x=localStorage.getItem(SK);if(x)salvo=JSON.parse(x);}catch(e){}
+  return aplicarProgramacao(salvo);
+}
+function saveState(snap){
+  try{
+    if(PROG){PROG[editando]=snap;localStorage.setItem(SK,JSON.stringify(PROG));}
+    else localStorage.setItem(SK,JSON.stringify(snap));
+  }catch(e){}
+}
+
+// ── DUAS SEMANAS (P1 / P2) ───────────────────────────────────────
+// A semana vigente é calculada pelo calendário; a barra deixa editar a outra
+// sem trocar o que o hóspede está vendo agora.
+function trocarGrade(qual){
+  collectCurrentView();
+  PROG[editando]=JSON.parse(JSON.stringify(aState));
+  editando=qual;
+  editandoForcado=(qual!==CPSemanas.semanaVigente(PROG.ancora));
+  aState=JSON.parse(JSON.stringify(PROG[qual]));
+  pintarBarraSemana();renderAdmin();
+}
+function copiarGrade(){
+  var outra=editando==='p1'?'p2':'p1';
+  if(!confirm('Copiar a '+editando.toUpperCase()+' inteira por cima da '+outra.toUpperCase()+'?\n\nO conteúdo atual da '+outra.toUpperCase()+' será substituído.'))return;
+  collectCurrentView();
+  PROG[editando]=JSON.parse(JSON.stringify(aState));
+  PROG[outra]=JSON.parse(JSON.stringify(aState));
+  saveState(aState);
+  publicar('programacao',PROG).then(function(){alert('Copiado. Lembre de ajustar o que muda na '+outra.toUpperCase()+'.');}).catch(publicarErro);
+}
+function inverterSemana(){
+  if(!confirm('Trocar qual programação vale nesta semana?\n\nAgora o hóspede vê a '+CPSemanas.semanaVigente(PROG.ancora).toUpperCase()+'; passará a ver a outra.'))return;
+  PROG.ancora=CPSemanas.inverterAncora(PROG.ancora);
+  editandoForcado=false;editando=CPSemanas.semanaVigente(PROG.ancora);
+  aState=JSON.parse(JSON.stringify(PROG[editando]));
+  saveState(aState);pintarBarraSemana();renderAdmin();
+  publicar('programacao',PROG).catch(publicarErro);
+}
+function pintarBarraSemana(){
+  var el=document.getElementById('barra-semana');
+  if(!el||!PROG)return;
+  var vig=CPSemanas.semanaVigente(PROG.ancora);
+  var prox=vig==='p1'?'p2':'p1';
+  el.innerHTML=
+     '<span class="bs-lbl">Programação da semana</span>'
+    +'<button class="bs-tab'+(editando==='p1'?' on':'')+'" onclick="trocarGrade(\'p1\')">P1'+(vig==='p1'?' • esta semana':'')+'</button>'
+    +'<button class="bs-tab'+(editando==='p2'?' on':'')+'" onclick="trocarGrade(\'p2\')">P2'+(vig==='p2'?' • esta semana':'')+'</button>'
+    +'<span class="bs-info">Hóspede vê a <b>'+vig.toUpperCase()+'</b> · na semana que vem, a '+prox.toUpperCase()+'</span>'
+    +'<button class="bs-acao" onclick="inverterSemana()" title="Use se a semana estiver trocada">⇄ Trocar a desta semana</button>'
+    +'<button class="bs-acao" onclick="copiarGrade()" title="Copiar esta grade para a outra">⧉ Copiar '+editando.toUpperCase()+' → '+(editando==='p1'?'P2':'P1')+'</button>';
+  el.classList.toggle('editando-outra',editando!==vig);
+}
 
 function loadJT(){
   try{var x=localStorage.getItem(SK_JT);if(x)return JSON.parse(JSON.stringify(JSON.parse(x)));}catch(e){}
@@ -315,13 +385,13 @@ var feriados=loadFeriados();
 function carregarServidor(){
   fetch('/api/recreacao',{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
     if(!d)return;
-    if(d.programacao){aState=d.programacao;saveState(aState);}
+    if(d.programacao){aState=aplicarProgramacao(d.programacao);saveState(aState);pintarBarraSemana();}
     if(d.jantares){jantares=d.jantares;try{localStorage.setItem(SK_JT,JSON.stringify(jantares));}catch(e){}}
     if(Array.isArray(d.feriados)){feriados=d.feriados;try{localStorage.setItem(SK_FER,JSON.stringify(feriados));}catch(e){}}
     renderAdmin();
   }).catch(function(){});
 }
-document.addEventListener('DOMContentLoaded',carregarServidor);
+document.addEventListener('DOMContentLoaded',function(){pintarBarraSemana();carregarServidor();});
 
 function publicar(chave,dados){
   return fetch('/api/recreacao-salvar',{
@@ -544,9 +614,10 @@ function doSave(){
     chave='jantares';dados=jantares;
   } else {
     var snap=JSON.parse(JSON.stringify(aState));
+    PROG[editando]=snap;               // grava na grade que está aberta (P1 ou P2)
     saveState(snap);
     aState=snap;
-    chave='programacao';dados=aState;
+    chave='programacao';dados=PROG;    // publica as DUAS grades + a âncora
   }
   var b=document.getElementById('save-btn');
   b.textContent='Publicando…';
